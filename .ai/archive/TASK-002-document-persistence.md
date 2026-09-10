@@ -2,7 +2,7 @@
 
 | Field | Value |
 | :--- | :--- |
-| **Status** | `planned` |
+| **Status** | `done` |
 | **Priority** | P0 |
 | **Value driver** | V-3 (a deletion cannot be auditable if the record never existed) |
 | **Depends on** | TASK-001 |
@@ -62,3 +62,25 @@ should not silently change if a row is ever backfilled or re-created.
 what lets an operator verify a downloaded file matches what was stored. If that
 justification does not convince at review, drop the column rather than keeping a
 field nobody uses.
+
+---
+
+## Outcome
+
+**Completed:** 2026-09-10
+**What was built:** `documents` migration (unique-indexed `uuid`, indexed
+`expires_at`, composite `(status, expires_at)` index); `App\Models\Document`
+casting `status` to `App\Domain\Document\DocumentStatus` and `uploaded_at`/
+`expires_at` to `datetime`, exposing `storedObject(): StoredObject`;
+`App\Domain\Storage\StoredObject` (readonly `disk` + `relativePath`);
+`App\Domain\Retention\RetentionPolicy::deadlineFor()`, the sole reader of
+`retention.ttl_hours`; `DocumentFactory` with `expired()`/`deleted()` states,
+resolving its default `expires_at` through `RetentionPolicy` rather than
+hardcoding 24h a second time. Verified against real MySQL (not just SQLite):
+migration applied cleanly with all three indexes present.
+**Deviations from the plan:** none — built as specified.
+**Invariants verified:** I-2 — `RetentionPolicyTest` proves the default
+24h deadline and that changing `retention.ttl_hours` at runtime changes the
+computed deadline; `deadlineFor()` is the only place in the codebase that
+adds to `uploadedAt`.
+**Follow-ups raised:** none.

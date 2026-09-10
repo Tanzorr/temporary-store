@@ -11,6 +11,10 @@ is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-002: `documents` table, `App\Models\Document`, `RetentionPolicy` and
+  `DocumentFactory`. `RetentionPolicy` is the only place an expiry is
+  computed (I-2), proven by a unit test covering the default TTL and a
+  changed config value.
 - TASK-001: Laravel 11 + Docker Compose skeleton — `app`, `web`, `mysql`,
   `rabbitmq`, `queue` and `scheduler` as six healthy, independently
   restarting services behind one `docker compose up -d --build`. Domain

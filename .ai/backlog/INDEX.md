@@ -10,7 +10,6 @@ New tickets follow [`TEMPLATE.md`](TEMPLATE.md) and are created in
 
 | ID | Title | Status | Priority | Value | Depends on |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| [TASK-002](TASK-002-document-persistence.md) | `documents` table, model, factory | `planned` | P0 | V-3 | 001 |
 | [TASK-003](TASK-003-upload-endpoint.md) | Async upload endpoint with server-side policy | `planned` | P1 | V-4, V-1 | 002 |
 | [TASK-004](TASK-004-upload-ui.md) | Bootstrap + jQuery uploader with progress | `planned` | P1 | V-4 | 003 |
 | [TASK-005](TASK-005-crud-page.md) | Document list, download, manual delete UI | `planned` | P1 | V-5 | 006 |
