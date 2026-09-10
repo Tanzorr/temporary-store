@@ -59,3 +59,4 @@ The specification is arranged to make that impossible:
 By the time anyone writes a controller, deleting without notifying is the awkward
 thing to do. The structure carries the requirement, rather than a reviewer having
 to remember it.
+# temporary-store
