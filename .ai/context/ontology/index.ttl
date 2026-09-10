@@ -1,0 +1,506 @@
+@prefix :    <http://temporary-store.local/ontology/2026/tds#> .
+@prefix tds:  <http://temporary-store.local/ontology/2026/tds#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc:   <http://purl.org/dc/elements/1.1/> .
+
+<http://temporary-store.local/ontology/2026/tds> a owl:Ontology ;
+    dc:title "Temporary Document Store Ontology" ;
+    dc:description "A domain ontology for a web application that accepts PDF and DOCX uploads, keeps them for a bounded retention window, deletes them manually or automatically, and announces every deletion over a message broker so that an email notification can be produced downstream." ;
+    owl:versionInfo "1.0.0" .
+
+#################################################################
+#    Classes (Core Concepts)
+#################################################################
+
+### 1. Document
+tds:Document a owl:Class ;
+    rdfs:label "Document" ;
+    rdfs:comment "The tracked record of one uploaded PDF or DOCX file: its identity, metadata, retention deadline and lifecycle status. The Document is the unit the user sees in the CRUD page; it is not the bytes themselves." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 2. StoredObject
+tds:StoredObject a owl:Class ;
+    rdfs:label "Stored Object" ;
+    rdfs:comment "The physical binary artifact persisted on a storage disk (local filesystem, S3-compatible bucket, ...) that backs exactly one Document. It has an independent lifetime: it can be purged while its Document row survives as a tombstone." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 3. UploadSession
+tds:UploadSession a owl:Class ;
+    rdfs:label "Upload Session" ;
+    rdfs:comment "A single asynchronous upload attempt initiated from the browser. It carries progress, an outcome and, when refused, the reason. A rejected session produces no Document." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 4. UploadPolicy
+tds:UploadPolicy a owl:Class ;
+    rdfs:label "Upload Policy" ;
+    rdfs:comment "The admission rules every UploadSession is validated against: maximum byte size, accepted MIME types and accepted extensions. Configuration-driven, never hardcoded at a call site." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 5. RetentionPolicy
+tds:RetentionPolicy a owl:Class ;
+    rdfs:label "Retention Policy" ;
+    rdfs:comment "The rule that bounds how long a Document may live. It turns an upload timestamp into an expiry deadline (default: 24 hours) and is the single source of truth for that arithmetic." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 6. RetentionSweep
+tds:RetentionSweep a owl:Class ;
+    rdfs:label "Retention Sweep" ;
+    rdfs:comment "One execution of the scheduled job that enforces a RetentionPolicy: it collects Documents whose deadline has passed and deletes them. Each run is idempotent and records how many candidates it found and removed." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 7. DeletionEvent
+tds:DeletionEvent a owl:Class ;
+    rdfs:label "Deletion Event" ;
+    rdfs:comment "The fact that a Document was removed, at a point in time, for a stated cause. It is the single junction where both deletion paths — manual and automatic — converge, which is what guarantees a notification for either path." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 8. DeletionTrigger
+tds:DeletionTrigger a owl:Class ;
+    rdfs:label "Deletion Trigger" ;
+    rdfs:comment "The enumerated cause of a DeletionEvent. Exactly two individuals exist: ManualDeletion (a human pressed Delete) and RetentionExpiry (the sweep found an expired Document)." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 9. NotificationMessage
+tds:NotificationMessage a owl:Class ;
+    rdfs:label "Notification Message" ;
+    rdfs:comment "The AMQP payload published after a DeletionEvent, describing the deleted Document and the cause, addressed to a NotificationRecipient. Publishing it is this application's responsibility; rendering and sending the email is not." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 10. MessageQueue
+tds:MessageQueue a owl:Class ;
+    rdfs:label "Message Queue" ;
+    rdfs:comment "The durable RabbitMQ destination (exchange plus queue bound by a routing key) that carries NotificationMessages to whatever consumer eventually delivers mail." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+### 11. NotificationRecipient
+tds:NotificationRecipient a owl:Class ;
+    rdfs:label "Notification Recipient" ;
+    rdfs:comment "The mailbox that is told about deletions. Its address is supplied by environment configuration rather than stored per Document, because the audience is the operator, not the uploader." ;
+    rdfs:isDefinedBy <http://temporary-store.local/ontology/2026/tds> .
+
+
+#################################################################
+#    Object Properties (Relationships)
+#################################################################
+
+### UploadSession <-> UploadPolicy
+tds:validatedAgainst a owl:ObjectProperty ;
+    rdfs:label "validated against" ;
+    rdfs:comment "Every upload attempt is checked against the admission rules before a single byte is committed to permanent storage." ;
+    rdfs:domain tds:UploadSession ;
+    rdfs:range tds:UploadPolicy .
+
+### UploadSession <-> Document
+tds:producesDocument a owl:ObjectProperty ;
+    rdfs:label "produces document" ;
+    rdfs:comment "A session that passes validation creates exactly one Document record. A rejected session produces none." ;
+    rdfs:domain tds:UploadSession ;
+    rdfs:range tds:Document ;
+    owl:inverseOf tds:wasProducedBy .
+
+tds:wasProducedBy a owl:ObjectProperty ;
+    rdfs:label "was produced by" ;
+    rdfs:comment "Traces a Document back to the upload attempt that created it." ;
+    rdfs:domain tds:Document ;
+    rdfs:range tds:UploadSession .
+
+### Document <-> StoredObject
+tds:hasStoredObject a owl:ObjectProperty ;
+    rdfs:label "has stored object" ;
+    rdfs:comment "Binds a Document's metadata to the bytes on disk that it describes." ;
+    rdfs:domain tds:Document ;
+    rdfs:range tds:StoredObject ;
+    owl:inverseOf tds:isStoredObjectOf .
+
+tds:isStoredObjectOf a owl:ObjectProperty ;
+    rdfs:label "is stored object of" ;
+    rdfs:comment "Resolves a file on disk back to the Document row that owns it; an object without this link is an orphan and may be reclaimed." ;
+    rdfs:domain tds:StoredObject ;
+    rdfs:range tds:Document .
+
+### Document <-> RetentionPolicy
+tds:governedBy a owl:ObjectProperty ;
+    rdfs:label "governed by" ;
+    rdfs:comment "Assigns the retention rule whose window determines this Document's expiry deadline." ;
+    rdfs:domain tds:Document ;
+    rdfs:range tds:RetentionPolicy ;
+    owl:inverseOf tds:governs .
+
+tds:governs a owl:ObjectProperty ;
+    rdfs:label "governs" ;
+    rdfs:comment "Relates a retention rule to every Document whose lifetime it bounds." ;
+    rdfs:domain tds:RetentionPolicy ;
+    rdfs:range tds:Document .
+
+### RetentionPolicy <-> RetentionSweep
+tds:enforcedBy a owl:ObjectProperty ;
+    rdfs:label "enforced by" ;
+    rdfs:comment "A retention rule is inert until a scheduled sweep acts on it; the sweep is the enforcement mechanism." ;
+    rdfs:domain tds:RetentionPolicy ;
+    rdfs:range tds:RetentionSweep ;
+    owl:inverseOf tds:enforces .
+
+tds:enforces a owl:ObjectProperty ;
+    rdfs:label "enforces" ;
+    rdfs:comment "Relates one sweep run to the retention rule it applies." ;
+    rdfs:domain tds:RetentionSweep ;
+    rdfs:range tds:RetentionPolicy .
+
+### RetentionSweep <-> Document
+tds:collectsExpired a owl:ObjectProperty ;
+    rdfs:label "collects expired" ;
+    rdfs:comment "The set of Documents a given sweep found past their deadline and selected for deletion." ;
+    rdfs:domain tds:RetentionSweep ;
+    rdfs:range tds:Document ;
+    owl:inverseOf tds:collectedBySweep .
+
+tds:collectedBySweep a owl:ObjectProperty ;
+    rdfs:label "collected by sweep" ;
+    rdfs:comment "Relates an expired Document to the sweep run that picked it up." ;
+    rdfs:domain tds:Document ;
+    rdfs:range tds:RetentionSweep .
+
+### Document <-> DeletionEvent
+tds:hasDeletionEvent a owl:ObjectProperty ;
+    rdfs:label "has deletion event" ;
+    rdfs:comment "Records that this Document has been deleted. Its presence is what makes a Document a tombstone rather than an available file." ;
+    rdfs:domain tds:Document ;
+    rdfs:range tds:DeletionEvent ;
+    owl:inverseOf tds:deletesDocument .
+
+tds:deletesDocument a owl:ObjectProperty ;
+    rdfs:label "deletes document" ;
+    rdfs:comment "Names the Document a deletion event removed." ;
+    rdfs:domain tds:DeletionEvent ;
+    rdfs:range tds:Document .
+
+### DeletionEvent <-> StoredObject
+tds:purges a owl:ObjectProperty ;
+    rdfs:label "purges" ;
+    rdfs:comment "A deletion event reclaims the bytes as well as the record; a purge that fails must not silently leave the Document marked deleted." ;
+    rdfs:domain tds:DeletionEvent ;
+    rdfs:range tds:StoredObject ;
+    owl:inverseOf tds:purgedBy .
+
+tds:purgedBy a owl:ObjectProperty ;
+    rdfs:label "purged by" ;
+    rdfs:comment "Relates bytes on disk back to the deletion event that reclaimed them." ;
+    rdfs:domain tds:StoredObject ;
+    rdfs:range tds:DeletionEvent .
+
+### DeletionEvent <-> DeletionTrigger
+tds:triggeredBy a owl:ObjectProperty ;
+    rdfs:label "triggered by" ;
+    rdfs:comment "States the cause of a deletion: a human action or an expired retention deadline. The cause travels into the notification payload." ;
+    rdfs:domain tds:DeletionEvent ;
+    rdfs:range tds:DeletionTrigger .
+
+### DeletionEvent <-> RetentionSweep
+tds:raisedDuringSweep a owl:ObjectProperty ;
+    rdfs:label "raised during sweep" ;
+    rdfs:comment "Present only on automatic deletions: links the event to the sweep run that raised it. Absent for manual deletions." ;
+    rdfs:domain tds:DeletionEvent ;
+    rdfs:range tds:RetentionSweep .
+
+### DeletionEvent <-> NotificationMessage
+tds:emitsNotification a owl:ObjectProperty ;
+    rdfs:label "emits notification" ;
+    rdfs:comment "Every deletion event, whatever its trigger, emits exactly one notification message. This is the invariant the whole notification requirement rests on." ;
+    rdfs:domain tds:DeletionEvent ;
+    rdfs:range tds:NotificationMessage ;
+    owl:inverseOf tds:emittedBy .
+
+tds:emittedBy a owl:ObjectProperty ;
+    rdfs:label "emitted by" ;
+    rdfs:comment "Traces a published message back to the deletion that caused it." ;
+    rdfs:domain tds:NotificationMessage ;
+    rdfs:range tds:DeletionEvent .
+
+### NotificationMessage <-> MessageQueue
+tds:publishedTo a owl:ObjectProperty ;
+    rdfs:label "published to" ;
+    rdfs:comment "The broker destination a notification is handed to. Once accepted by the broker, this application's responsibility ends." ;
+    rdfs:domain tds:NotificationMessage ;
+    rdfs:range tds:MessageQueue ;
+    owl:inverseOf tds:carries .
+
+tds:carries a owl:ObjectProperty ;
+    rdfs:label "carries" ;
+    rdfs:comment "Relates a queue to the notification messages it transports to consumers." ;
+    rdfs:domain tds:MessageQueue ;
+    rdfs:range tds:NotificationMessage .
+
+### NotificationMessage <-> NotificationRecipient
+tds:addressedTo a owl:ObjectProperty ;
+    rdfs:label "addressed to" ;
+    rdfs:comment "The mailbox the downstream consumer should deliver this notification to, carried in the payload rather than assumed by the consumer." ;
+    rdfs:domain tds:NotificationMessage ;
+    rdfs:range tds:NotificationRecipient ;
+    owl:inverseOf tds:receives .
+
+tds:receives a owl:ObjectProperty ;
+    rdfs:label "receives" ;
+    rdfs:comment "Relates the configured recipient to the notifications intended for it." ;
+    rdfs:domain tds:NotificationRecipient ;
+    rdfs:range tds:NotificationMessage .
+
+
+#################################################################
+#    Datatype Properties (Attributes & Literals)
+#################################################################
+
+### Document
+tds:documentId a owl:DatatypeProperty ;
+    rdfs:label "document id" ;
+    rdfs:comment "Opaque public identifier (UUID) used in URLs so that internal row ids are never exposed or guessable." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:string .
+
+tds:originalName a owl:DatatypeProperty ;
+    rdfs:label "original name" ;
+    rdfs:comment "The filename as the user submitted it, preserved for display and download only, never used as a path segment." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:string .
+
+tds:storedName a owl:DatatypeProperty ;
+    rdfs:label "stored name" ;
+    rdfs:comment "The generated, collision-free name used on disk." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:string .
+
+tds:mimeType a owl:DatatypeProperty ;
+    rdfs:label "mime type" ;
+    rdfs:comment "MIME type detected from file content, not from the client-supplied header." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:string .
+
+tds:extension a owl:DatatypeProperty ;
+    rdfs:label "extension" ;
+    rdfs:comment "Normalised lowercase extension: pdf or docx." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:string .
+
+tds:sizeBytes a owl:DatatypeProperty ;
+    rdfs:label "size bytes" ;
+    rdfs:comment "Payload size in bytes, recorded after the upload completes." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:integer .
+
+tds:checksumSha256 a owl:DatatypeProperty ;
+    rdfs:label "checksum sha256" ;
+    rdfs:comment "Content hash, allowing integrity checks and duplicate detection." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:string .
+
+tds:uploadedAt a owl:DatatypeProperty ;
+    rdfs:label "uploaded at" ;
+    rdfs:comment "UTC instant the upload completed; the origin of the retention countdown." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:dateTime .
+
+tds:expiresAt a owl:DatatypeProperty ;
+    rdfs:label "expires at" ;
+    rdfs:comment "Materialised deadline (uploadedAt + retention window), stored so the sweep can select expired rows with an indexed query instead of computing in PHP." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:dateTime .
+
+tds:documentStatus a owl:DatatypeProperty ;
+    rdfs:label "document status" ;
+    rdfs:comment "Lifecycle state: available or deleted." ;
+    rdfs:domain tds:Document ; rdfs:range xsd:string .
+
+### StoredObject
+tds:diskName a owl:DatatypeProperty ;
+    rdfs:label "disk name" ;
+    rdfs:comment "Logical storage disk the object lives on, so the backend can change without touching call sites." ;
+    rdfs:domain tds:StoredObject ; rdfs:range xsd:string .
+
+tds:relativePath a owl:DatatypeProperty ;
+    rdfs:label "relative path" ;
+    rdfs:comment "Path of the object within its disk, always relative and never user-controlled." ;
+    rdfs:domain tds:StoredObject ; rdfs:range xsd:string .
+
+tds:existsOnDisk a owl:DatatypeProperty ;
+    rdfs:label "exists on disk" ;
+    rdfs:comment "Whether the bytes are still present; false once purged." ;
+    rdfs:domain tds:StoredObject ; rdfs:range xsd:boolean .
+
+### UploadSession
+tds:sessionToken a owl:DatatypeProperty ;
+    rdfs:label "session token" ;
+    rdfs:comment "Client-generated correlation token that lets the browser track progress of one asynchronous upload." ;
+    rdfs:domain tds:UploadSession ; rdfs:range xsd:string .
+
+tds:startedAt a owl:DatatypeProperty ;
+    rdfs:label "started at" ;
+    rdfs:comment "UTC instant the browser began transmitting." ;
+    rdfs:domain tds:UploadSession ; rdfs:range xsd:dateTime .
+
+tds:completedAt a owl:DatatypeProperty ;
+    rdfs:label "completed at" ;
+    rdfs:comment "UTC instant the server finished accepting or refusing the upload." ;
+    rdfs:domain tds:UploadSession ; rdfs:range xsd:dateTime .
+
+tds:uploadOutcome a owl:DatatypeProperty ;
+    rdfs:label "upload outcome" ;
+    rdfs:comment "accepted or rejected." ;
+    rdfs:domain tds:UploadSession ; rdfs:range xsd:string .
+
+tds:rejectionReason a owl:DatatypeProperty ;
+    rdfs:label "rejection reason" ;
+    rdfs:comment "Machine-readable code explaining a refusal (too_large, unsupported_type, corrupt) so the UI can show a precise message." ;
+    rdfs:domain tds:UploadSession ; rdfs:range xsd:string .
+
+### UploadPolicy
+tds:maxSizeBytes a owl:DatatypeProperty ;
+    rdfs:label "max size bytes" ;
+    rdfs:comment "Largest accepted payload; the default is 10 MB and it must be enforced server-side even though the client also checks it." ;
+    rdfs:domain tds:UploadPolicy ; rdfs:range xsd:integer .
+
+tds:allowedMimeTypes a owl:DatatypeProperty ;
+    rdfs:label "allowed mime types" ;
+    rdfs:comment "Whitelist of accepted content types: application/pdf and the OOXML wordprocessing type." ;
+    rdfs:domain tds:UploadPolicy ; rdfs:range xsd:string .
+
+tds:allowedExtensions a owl:DatatypeProperty ;
+    rdfs:label "allowed extensions" ;
+    rdfs:comment "Whitelist of accepted extensions: pdf, docx." ;
+    rdfs:domain tds:UploadPolicy ; rdfs:range xsd:string .
+
+### RetentionPolicy
+tds:policyName a owl:DatatypeProperty ;
+    rdfs:label "policy name" ;
+    rdfs:comment "Human-readable name of the retention rule, e.g. default-24h." ;
+    rdfs:domain tds:RetentionPolicy ; rdfs:range xsd:string .
+
+tds:ttlHours a owl:DatatypeProperty ;
+    rdfs:label "ttl hours" ;
+    rdfs:comment "Length of the retention window in hours; 24 by default, configurable so tests can shorten it." ;
+    rdfs:domain tds:RetentionPolicy ; rdfs:range xsd:integer .
+
+### RetentionSweep
+tds:sweepId a owl:DatatypeProperty ;
+    rdfs:label "sweep id" ;
+    rdfs:comment "Identifier of one sweep run, used to correlate log lines and deletion events." ;
+    rdfs:domain tds:RetentionSweep ; rdfs:range xsd:string .
+
+tds:cronExpression a owl:DatatypeProperty ;
+    rdfs:label "cron expression" ;
+    rdfs:comment "Schedule the sweep runs on; frequent enough that the deletion lag stays small relative to the window." ;
+    rdfs:domain tds:RetentionSweep ; rdfs:range xsd:string .
+
+tds:ranAt a owl:DatatypeProperty ;
+    rdfs:label "ran at" ;
+    rdfs:comment "UTC instant this sweep started." ;
+    rdfs:domain tds:RetentionSweep ; rdfs:range xsd:dateTime .
+
+tds:candidateCount a owl:DatatypeProperty ;
+    rdfs:label "candidate count" ;
+    rdfs:comment "How many expired Documents this run selected." ;
+    rdfs:domain tds:RetentionSweep ; rdfs:range xsd:integer .
+
+tds:deletedCount a owl:DatatypeProperty ;
+    rdfs:label "deleted count" ;
+    rdfs:comment "How many were actually deleted; a gap against candidateCount signals failures worth alerting on." ;
+    rdfs:domain tds:RetentionSweep ; rdfs:range xsd:integer .
+
+### DeletionEvent
+tds:eventId a owl:DatatypeProperty ;
+    rdfs:label "event id" ;
+    rdfs:comment "Identifier of the deletion event, reused as the message id so publication can be made idempotent." ;
+    rdfs:domain tds:DeletionEvent ; rdfs:range xsd:string .
+
+tds:occurredAt a owl:DatatypeProperty ;
+    rdfs:label "occurred at" ;
+    rdfs:comment "UTC instant the deletion was committed." ;
+    rdfs:domain tds:DeletionEvent ; rdfs:range xsd:dateTime .
+
+tds:initiator a owl:DatatypeProperty ;
+    rdfs:label "initiator" ;
+    rdfs:comment "Who acted: user or scheduler." ;
+    rdfs:domain tds:DeletionEvent ; rdfs:range xsd:string .
+
+### DeletionTrigger
+tds:triggerCode a owl:DatatypeProperty ;
+    rdfs:label "trigger code" ;
+    rdfs:comment "Stable code carried in the notification payload: manual_deletion or retention_expiry." ;
+    rdfs:domain tds:DeletionTrigger ; rdfs:range xsd:string .
+
+tds:triggerLabel a owl:DatatypeProperty ;
+    rdfs:label "trigger label" ;
+    rdfs:comment "Display text for the cause, used in the UI and in the eventual email body." ;
+    rdfs:domain tds:DeletionTrigger ; rdfs:range xsd:string .
+
+### NotificationMessage
+tds:messageId a owl:DatatypeProperty ;
+    rdfs:label "message id" ;
+    rdfs:comment "Broker-level message identifier, letting consumers discard duplicates." ;
+    rdfs:domain tds:NotificationMessage ; rdfs:range xsd:string .
+
+tds:routingKey a owl:DatatypeProperty ;
+    rdfs:label "routing key" ;
+    rdfs:comment "Key the exchange routes on, e.g. document.deleted." ;
+    rdfs:domain tds:NotificationMessage ; rdfs:range xsd:string .
+
+tds:payloadJson a owl:DatatypeProperty ;
+    rdfs:label "payload json" ;
+    rdfs:comment "Versioned JSON body describing the deleted Document, the trigger and the recipient." ;
+    rdfs:domain tds:NotificationMessage ; rdfs:range xsd:string .
+
+tds:publishedAt a owl:DatatypeProperty ;
+    rdfs:label "published at" ;
+    rdfs:comment "UTC instant the broker acknowledged the message." ;
+    rdfs:domain tds:NotificationMessage ; rdfs:range xsd:dateTime .
+
+tds:subjectLine a owl:DatatypeProperty ;
+    rdfs:label "subject line" ;
+    rdfs:comment "Suggested email subject, precomputed so the consumer needs no domain knowledge." ;
+    rdfs:domain tds:NotificationMessage ; rdfs:range xsd:string .
+
+### MessageQueue
+tds:queueName a owl:DatatypeProperty ;
+    rdfs:label "queue name" ;
+    rdfs:comment "Name of the durable queue notifications land in." ;
+    rdfs:domain tds:MessageQueue ; rdfs:range xsd:string .
+
+tds:exchangeName a owl:DatatypeProperty ;
+    rdfs:label "exchange name" ;
+    rdfs:comment "Exchange the publisher targets." ;
+    rdfs:domain tds:MessageQueue ; rdfs:range xsd:string .
+
+tds:durable a owl:DatatypeProperty ;
+    rdfs:label "durable" ;
+    rdfs:comment "Whether the destination survives a broker restart; true, so notifications are not lost." ;
+    rdfs:domain tds:MessageQueue ; rdfs:range xsd:boolean .
+
+tds:brokerHost a owl:DatatypeProperty ;
+    rdfs:label "broker host" ;
+    rdfs:comment "Host of the RabbitMQ node, supplied by environment configuration." ;
+    rdfs:domain tds:MessageQueue ; rdfs:range xsd:string .
+
+### NotificationRecipient
+tds:emailAddress a owl:DatatypeProperty ;
+    rdfs:label "email address" ;
+    rdfs:comment "Mailbox that receives deletion notifications." ;
+    rdfs:domain tds:NotificationRecipient ; rdfs:range xsd:string .
+
+tds:envKey a owl:DatatypeProperty ;
+    rdfs:label "env key" ;
+    rdfs:comment "Environment variable the address is read from, so it is never committed to the repository." ;
+    rdfs:domain tds:NotificationRecipient ; rdfs:range xsd:string .
+
+
+#################################################################
+#    Individuals (Closed Enumerations)
+#################################################################
+
+tds:DeletionTrigger owl:equivalentClass [
+    a owl:Class ;
+    owl:oneOf ( tds:ManualDeletion tds:RetentionExpiry )
+] .
+
+tds:ManualDeletion a owl:NamedIndividual, tds:DeletionTrigger ;
+    rdfs:label "Manual Deletion" ;
+    rdfs:comment "A human removed the document from the CRUD page before its deadline." ;
+    tds:triggerCode "manual_deletion" ;
+    tds:triggerLabel "Deleted manually by an operator" .
+
+tds:RetentionExpiry a owl:NamedIndividual, tds:DeletionTrigger ;
+    rdfs:label "Retention Expiry" ;
+    rdfs:comment "The retention sweep found the document past its deadline and removed it." ;
+    tds:triggerCode "retention_expiry" ;
+    tds:triggerLabel "Deleted automatically after the retention window elapsed" .

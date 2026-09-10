@@ -1,0 +1,43 @@
+# Environment — never commit real credentials or the notification address (I-9)
+.env
+.env.backup
+.env.production
+.env.*.local
+
+# Dependencies
+/vendor
+/node_modules
+
+# Laravel runtime
+/storage/*.key
+/storage/app/*
+!/storage/app/.gitkeep
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/public/storage
+/public/hot
+/public/build
+Homestead.json
+Homestead.yaml
+auth.json
+
+# Tooling
+.phpunit.result.cache
+.phpunit.cache
+/.php-cs-fixer.cache
+
+# IDE / OS
+/.idea
+/.vscode
+/.fleet
+/.nova
+.DS_Store
+Thumbs.db
+
+# Claude Code — project settings and the .ai layer ARE committed on purpose.
+# Only personal overrides stay local.
+.claude/settings.local.json

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "permissions": {
+    "defaultMode": "default",
+
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(jq:*)",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(file:*)",
+      "Bash(stat:*)",
+      "Bash(du:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git blame:*)",
+      "Bash(git grep:*)",
+      "Bash(git ls-files:*)",
+
+      "Bash(php artisan test:*)",
+      "Bash(php artisan route:list:*)",
+      "Bash(php artisan schedule:list:*)",
+      "Bash(php artisan config:show:*)",
+      "Bash(php artisan about:*)",
+      "Bash(php artisan migrate:status:*)",
+      "Bash(php artisan documents:sweep-expired:*)",
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(./vendor/bin/phpunit:*)",
+      "Bash(composer show:*)",
+      "Bash(composer validate:*)",
+
+      "Bash(docker compose ps:*)",
+      "Bash(docker compose logs:*)",
+      "Bash(docker compose config:*)",
+      "Bash(docker compose exec app php artisan test:*)",
+      "Bash(docker compose exec app php artisan route:list:*)",
+      "Bash(docker compose exec app php artisan schedule:list:*)",
+      "Bash(docker compose exec app php artisan migrate:status:*)",
+      "Bash(docker compose exec app php artisan documents:sweep-expired:*)",
+      "Bash(docker compose exec app ./vendor/bin/pint:*)",
+      "Bash(docker compose exec rabbitmq rabbitmqctl list_queues:*)",
+      "Bash(docker compose exec rabbitmq rabbitmqadmin get:*)"
+    ],
+
+    "ask": [
+      "Bash(composer require:*)",
+      "Bash(composer remove:*)",
+      "Bash(composer update:*)",
+      "Bash(npm install:*)",
+      "Bash(npm uninstall:*)",
+
+      "Bash(php artisan migrate:*)",
+      "Bash(docker compose exec app php artisan migrate:*)",
+      "Bash(php artisan db:*)",
+
+      "Bash(docker compose up:*)",
+      "Bash(docker compose down:*)",
+      "Bash(docker compose build:*)",
+      "Bash(docker compose restart:*)",
+      "Bash(docker volume:*)",
+
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+
+      "Edit(./composer.json)",
+      "Edit(./composer.lock)",
+      "Edit(./docker-compose.yml)",
+      "Edit(./.env.example)"
+    ],
+
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./auth.json)",
+      "Read(./storage/app/**)",
+      "Read(./**/*.key)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.p12)",
+      "Read(./**/id_rsa*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+
+      "Edit(./.env)",
+      "Edit(./vendor/**)",
+      "Edit(./node_modules/**)",
+      "Edit(./storage/framework/**)",
+
+      "Bash(cat .env)",
+      "Bash(cat ./.env)",
+      "Bash(rm -rf:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(docker compose down -v:*)",
+      "Bash(php artisan migrate:fresh:*)",
+      "Bash(docker compose exec app php artisan migrate:fresh:*)",
+      "Bash(chmod 777:*)"
+    ]
+  }
+}
