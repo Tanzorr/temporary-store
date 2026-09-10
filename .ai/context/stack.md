@@ -35,6 +35,30 @@ inside `app`. A crashed worker must be visible as a restarting container, not
 hidden inside a healthy-looking web container. This is what protects success
 criterion S-1 and the "scheduler not running" risk in `VALUE.md`.
 
+Every service declares a **healthcheck**. Without one, `queue` and `scheduler`
+report `running` forever — including while the worker inside them is dead, which
+is the exact failure the previous paragraph exists to expose. `pgrep -f` on the
+artisan process is enough, and it is why the image installs `procps`.
+
+### The `app` image
+
+`php:8.2-fpm`, built once and shared by `app`, `queue` and `scheduler`.
+
+| Extension | Needed by |
+| :--- | :--- |
+| `pdo_mysql` | Eloquent |
+| `sockets` | `php-amqplib` requires it outright — without it `composer require` fails, not just the connection |
+| `pcntl` | `queue:work` shutting down cleanly on `SIGTERM`. Without it a restart kills a job mid-flight |
+| `zip` | Composer unpacking dist archives |
+| `opcache` | Throughput. Cheap, and the only one here that is merely nice to have |
+
+`fileinfo` (content MIME detection, ADR-006), `mbstring` (also required by
+`php-amqplib`) and `pdo_sqlite` (the in-memory test database) ship enabled in the
+official image. Confirm with `php -m` rather than assuming — they are the kind of
+thing a base-image change removes silently.
+
+Add nothing else. An extension in the image is a thing the reviewer has to trust.
+
 ## Environment Variables
 
 Domain-specific keys beyond the Laravel defaults:

@@ -8,7 +8,8 @@ once its Definition of Done is satisfied in full
 
 | ID | Title | Completed | Value | Outcome |
 | :--- | :--- | :--- | :--- | :--- |
-| — | *Nothing archived yet* | — | — | — |
+| [TASK-001](TASK-001-project-skeleton.md) | Laravel + Docker Compose skeleton | 2026-09-10 | V-4 | Six healthy services; verified against a from-scratch, vendor-free clone |
+| [TASK-002](TASK-002-document-persistence.md) | `documents` table, model, factory | 2026-09-10 | V-3 | `RetentionPolicy` is the sole source of `expiresAt`; verified against real MySQL |
 
 ## How to Archive a Ticket
 

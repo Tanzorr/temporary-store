@@ -136,3 +136,23 @@ resolver.
 Cost: if a third page later needs server-rendered fragments, the branch appears
 and this ADR gets superseded. Accepted — a layer of indirection is cheap to add
 once it is earned and expensive to carry before then.
+
+### ADR-009 — Session and cache driver default to `file`, not Laravel's `database`
+**2026-09-10 · Accepted**
+Laravel 11 scaffolds `SESSION_DRIVER`/`CACHE_STORE` as `database`. With that
+default, the welcome page 500s until `php artisan migrate` has run, because the
+`sessions`/`cache` tables do not exist yet — breaking TASK-001's Goal ("one
+command → a working page") before AC-3 is even reached. `file` needs nothing
+migrated. Cost: session/cache state is not queryable via the database. Acceptable
+— this store has no auth (non-goal, `VALUE.md`) and no multi-instance deployment
+to make file-based state a problem.
+
+### ADR-010 — RabbitMQ `loopback_users.guest = false`
+**2026-09-10 · Accepted**
+RabbitMQ's default `guest` user authenticates only from the broker's own
+loopback interface. A container reaching `rabbitmq` over the compose network is
+not "localhost" to the broker, so the `guest`/`guest` credentials in
+`.env.example` would otherwise never connect. Cost: `guest` becomes usable from
+any host that can reach the broker, not just its own loopback. Acceptable — this
+is a dev-only broker on the Compose network (`stack.md`), not exposed to the
+host beyond the mapped ports.
