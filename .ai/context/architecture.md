@@ -165,6 +165,17 @@ in a diff. Accepted, because the alternative is a demo that silently renders
 unstyled and cannot upload at all when the CDN is unreachable or blocked.
 Pinned versions: Bootstrap 5.3.3, jQuery 3.7.1.
 
+### ADR-013 — Presenters live in `App\Http\Presenters`
+**2026-09-10 · Accepted**
+`DocumentRow` derives two display values (`timeRemainingLabel`,
+`awaitingSweep`) from `expires_at`, and both must never drift from the
+sweep's `WHERE expires_at <= NOW()`. Two alternatives were rejected: a Blade
+helper (banned — no business logic in templates, `conventions.md` → DON'T),
+and an `App\Domain` value object (rejected — it would have to import
+`App\Models\Document`, an upward dependency against this file's layering
+rule). Cost: a third directory under `app/Http`. Accepted — it makes the two
+drift-prone rules unit-testable in isolation from the view.
+
 ### ADR-011 — DOCX admitted by its OOXML MIME type alone, no `application/zip` fallback
 **2026-09-10 · Accepted**
 `stack.md` flagged a risk: some `file`/magic databases detect a `.docx` as

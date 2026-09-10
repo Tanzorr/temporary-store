@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Domain\Document\DocumentStatus;
 use App\Domain\Storage\StoredObject;
 use Database\Factories\DocumentFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,6 +34,14 @@ final class Document extends Model
     public function storedObject(): StoredObject
     {
         return new StoredObject($this->disk, $this->relative_path);
+    }
+
+    /**
+     * The one place a read expresses `status = available` (conventions.md).
+     */
+    public function scopeAvailable(Builder $query): void
+    {
+        $query->where('status', DocumentStatus::Available);
     }
 
     /**

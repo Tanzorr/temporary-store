@@ -11,6 +11,16 @@ is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-005: `GET /documents` — the operator's document list, with download and
+  manual delete. Available documents only (T-5), paginated 25 per page,
+  newest-first with an `id` tie-break for a stable order within one second.
+  `App\Http\Presenters\DocumentRow` (ADR-013) derives size/type labels and
+  the *awaiting sweep* / time-remaining values from `expires_at`, so the view
+  makes no expiry decision of its own (I-7, I-2). Delete goes through
+  `DeleteDocument::handle(..., DeletionTrigger::MANUAL_DELETION)` and nothing
+  else (I-3); the row is removed client-side by jQuery after a `window.confirm()`
+  and a JSON `DELETE`, no page reload. Download streams the file under its
+  original, escaped name with the stored `mime_type` as `Content-Type`.
 - TASK-006: `App\Services\DeleteDocument`, the only place a `Document` may be
   deleted (I-3). One transaction creates the `DeletionEvent`, purges the
   `StoredObject`, then marks the document deleted — rolling back all three if

@@ -46,6 +46,7 @@
                 </tr>
             </tbody>
         </table>
+        <a href="{{ route('documents.index') }}">View all documents</a>
     </div>
 @endsection
 

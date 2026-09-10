@@ -10,7 +10,6 @@ New tickets follow [`TEMPLATE.md`](TEMPLATE.md) and are created in
 
 | ID | Title | Status | Priority | Value | Depends on |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| [TASK-005](TASK-005-crud-page.md) | Document list, download, manual delete UI | `planned` | P1 | V-5 | 006 |
 | [TASK-007](TASK-007-rabbitmq-publisher.md) | Notification publisher + queued job | `planned` | P1 | V-3, V-6 | 006 |
 | [TASK-008](TASK-008-retention-sweep.md) | Retention sweep command + scheduler | `planned` | P1 | V-1, V-2 | 006, 007 |
 | [TASK-009](TASK-009-test-suite.md) | Test suite covering T-1…T-15 | `planned` | P1 | V-3 | 008 |
