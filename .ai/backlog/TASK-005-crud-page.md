@@ -42,6 +42,13 @@ deletion travelling the same path as an automatic one.
       must not imply a promise the sweep is about to break.
 - [ ] AC-9 — Feature test T-5, plus a test asserting the manual delete route
       produces a `DeletionEvent` with trigger `manual_deletion` (part of T-6).
+- [ ] AC-10 — Controller actions return an array of data, not a `Response`. A
+      `RespondsWithView` trait resolves it into the full Blade view, the fragment
+      view, or JSON — per **ADR-008**. No action inspects the request to decide
+      its own shape, and no action contains an `if ($request->ajax())` branch.
+- [ ] AC-11 — The list is defined once and rendered by both the full page and the
+      fragment. A feature test requests the same route with and without
+      `X-Requested-With: XMLHttpRequest` and asserts both carry the same rows.
 
 ## Out of Scope
 

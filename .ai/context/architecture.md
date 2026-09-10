@@ -120,3 +120,27 @@ reviewer did not ask for and lengthens `README` setup. Async upload uses
 The client `Content-Type` header is attacker-controlled. Detection uses PHP's
 fileinfo on the temporary upload, checked against the `UploadPolicy` whitelist
 (**I-8**). Extension alone is never sufficient.
+
+### ADR-008 — Controller actions return data; a resolver picks the representation
+**2026-09-10 · Accepted**
+Every page in this application must serve two shapes of the same content: a full
+HTML document on first load, and a fragment when jQuery refreshes part of the
+page after an upload or a delete. The obvious implementation branches inside each
+action (`if ($request->ajax()) { ... } else { ... }`), which duplicates the branch
+in every action and lets the two shapes drift apart.
+
+Instead an action returns a plain array of data, and a `RespondsWithView` trait
+resolves it: full Blade view for a normal request, fragment view for a request
+carrying `X-Requested-With: XMLHttpRequest`, JSON when the client asks for it.
+The action states which templates it supports; it never inspects the request.
+
+Adapted from the `#[RepresentAs]` attribute in the reviewer's `quizler` project,
+which does the same job with repeatable PHP attributes over Symfony + Turbo. We
+keep the idea and drop the attribute layer: Laravel has no attribute routing, and
+a trait plus a per-action template map is enough for three representations.
+
+Cost: one indirection between action and response. Buys a single definition of
+what a page contains, and no request-sniffing scattered across controllers.
+
+*(ADR-007 is reserved for the tooling-language decision in `TASK-011`, which is
+scheduled first.)*
