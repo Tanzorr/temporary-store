@@ -8,7 +8,7 @@ once its Definition of Done is satisfied in full
 
 | ID | Title | Completed | Value | Outcome |
 | :--- | :--- | :--- | :--- | :--- |
-| — | *Nothing archived yet* | — | — | — |
+| [TASK-001](TASK-001-project-skeleton.md) | Laravel + Docker Compose skeleton | 2026-09-10 | V-4 | Six healthy services; verified against a from-scratch, vendor-free clone |
 
 ## How to Archive a Ticket
 
