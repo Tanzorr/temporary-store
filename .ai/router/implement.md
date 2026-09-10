@@ -9,7 +9,7 @@ Build what a ticket describes.
 3. [`../context/architecture.md`](../context/architecture.md) — layering, concept→code map, ADRs
 4. [`../context/stack.md`](../context/stack.md) — versions, services, env keys
 5. [`../context/testing.md`](../context/testing.md) — before writing tests
-6. The invariants the ticket names, from [`../context/ontology/README.md`](../context/ontology/README.md)
+6. The invariants the ticket names, from [`../context/ontology.md`](../context/ontology.md)
 
 ## Sequence
 
@@ -33,7 +33,7 @@ Build what a ticket describes.
   it here makes the diff unreviewable and the revert impossible.
 - **Never delete a `Document` outside `DeleteDocument`** — invariant I-3, the one
   rule most worth protecting in this codebase.
-- **New concept ⇒ update `index.ttl`** in the same change, not later.
+- **New concept ⇒ update `ontology.md`** in the same change, not later.
 - **New decision ⇒ ADR** in `architecture.md`. A choice between two real options,
   recorded in four lines, is worth more than any amount of inline commentary.
 - **Blocked or the ticket is wrong?** Stop and say so. Do not implement something
@@ -43,4 +43,4 @@ Build what a ticket describes.
 ## Done When
 
 The Definition of Done in [`../context/conventions.md`](../context/conventions.md)
-is satisfied in full — all seven items, not the convenient five.
+is satisfied in full — every item, not the convenient five.

@@ -114,7 +114,7 @@ Named explicitly so scope cannot creep in through the back door:
 
 | Risk | Impact | Mitigation |
 | :--- | :--- | :--- |
-| Scheduler not running in production | Files live forever; V-1 and V-2 silently lost — the worst failure because nothing errors | Sweep records `ranAt`; monitor its freshness, not just its exit code |
+| Scheduler not running in production | Files live forever; V-1 and V-2 silently lost — the worst failure because nothing errors | **Partly mitigated.** Each run logs `ran_at`, `candidate_count`, `deleted_count`, and `schedule:list` shows the registration — enough to check by hand. Real freshness monitoring needs a persisted last-run timestamp and an alert, which is out of scope here and would be the first thing to add in production |
 | Broker unreachable at deletion time | Notification lost; V-3 broken | Publish from a durable queued job with retries (I-10) |
 | Notification published for a rolled-back deletion | Operator told a file is gone when it is not | Publish only after commit (I-4) |
 | Purge fails but the record is marked deleted | Bytes outlive the record — the exact liability the product exists to remove | Treat purge failure as a failed deletion; retry, do not swallow |

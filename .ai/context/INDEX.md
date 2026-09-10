@@ -6,8 +6,7 @@ every time.
 
 | Module | Read it when | Answers |
 | :--- | :--- | :--- |
-| [`ontology/index.ttl`](ontology/index.ttl) | Planning, modelling, any change to what entities mean | What exists in the domain, how concepts relate, which invariants hold |
-| [`ontology/README.md`](ontology/README.md) | Same, human-readable first pass | Concept table, relation graph, invariants I-1…I-10, open questions |
+| [`ontology.md`](ontology.md) | Planning, modelling, any change to what entities mean | Concept table, relation graph, invariants I-1…I-10, open questions |
 | [`stack.md`](stack.md) | Before running or wiring anything | Versions, services, ports, env vars, how to run things |
 | [`architecture.md`](architecture.md) | Before adding a class or choosing where code goes | Layering, where each ontology concept lives in code, ADRs |
 | [`conventions.md`](conventions.md) | Every time you write code | Naming, structure, design principles (SOLID, refactoring vocabulary), DOs/DON'Ts, Definition of Done |
@@ -17,7 +16,7 @@ every time.
 ## Reading Order for a Cold Start
 
 1. [`../business/VALUE.md`](../business/VALUE.md) — why the system exists
-2. [`ontology/README.md`](ontology/README.md) — what the domain contains
+2. [`ontology.md`](ontology.md) — what the domain contains
 3. [`stack.md`](stack.md) — what is actually installed
 4. [`architecture.md`](architecture.md) — where things go
 5. [`conventions.md`](conventions.md) — how to write them

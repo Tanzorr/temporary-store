@@ -16,7 +16,7 @@ One paragraph: what changes for a user or operator when this lands. Not how.
 
 **Concepts:** `tds:Concept`, …
 **Invariants that must hold:** `I-n`, …
-**New concepts introduced:** none — or name them, and note that `index.ttl` is
+**New concepts introduced:** none — or name them, and note that `ontology.md` is
 updated as part of this ticket.
 
 ## Acceptance Criteria

@@ -6,9 +6,8 @@ operator — and **every** deletion publishes a notification message to RabbitMQ
 that an email can be sent downstream.
 
 > **Status: specification complete, implementation not started.**
-> Work begins at [`TASK-011`](.ai/backlog/TASK-011-agent-tooling.md) (tooling,
-> no dependencies) and [`TASK-001`](.ai/backlog/TASK-001-project-skeleton.md)
-> (Laravel + Docker). Setup instructions arrive with
+> Work begins at [`TASK-001`](.ai/backlog/TASK-001-project-skeleton.md)
+> (Laravel + Docker Compose). Setup instructions arrive with
 > [`TASK-010`](.ai/backlog/TASK-010-readme.md).
 
 **Planned stack:** Laravel 11 · PHP 8.2 · MySQL 8 · RabbitMQ 3.13 ·
@@ -31,9 +30,9 @@ CLAUDE.md              Entry point: brevity · ontology · routing · tool usage
 CHANGELOG.md           User-visible changes, each tagged with its ticket
 .claude/settings.json  Machine-enforced permissions for the agent
 .ai/business/          Why the system exists — value drivers, non-goals
-.ai/context/           Ontology (OWL/RDFS), architecture, conventions, testing
-.ai/router/            One file per working mode
-.ai/backlog/           TASK-001…TASK-011, with acceptance criteria
+.ai/context/           Ontology, architecture, conventions, testing, tooling
+.ai/router/            implement · review
+.ai/backlog/           TASK-001…TASK-010, with acceptance criteria
 .ai/archive/           Completed work, with outcome notes
 ```
 
@@ -51,8 +50,7 @@ The specification is arranged to make that impossible:
 | Layer | What it does about it |
 | :--- | :--- |
 | `VALUE.md` | Driver **V-3** (auditable deletion), criterion **S-2**: `count(DeletionEvent) == count(NotificationMessage)` |
-| `ontology/index.ttl` | `DeletionEvent` is a first-class concept where both deletion paths converge |
-| `ontology/README.md` | Invariant **I-3**, stated so it can be checked |
+| `ontology.md` | `DeletionEvent` is a first-class concept where both deletion paths converge, and invariant **I-3** states it so it can be checked |
 | `architecture.md` | ADR-001 records why; `DeleteDocument` is the only entry point |
 | `conventions.md` | "Don't delete a `Document` outside `DeleteDocument`" |
 | `TASK-006` | Builds that path *before* either caller exists |

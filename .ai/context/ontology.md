@@ -1,30 +1,29 @@
 # Ontology — Temporary Document Store
 
-Machine-readable source: [`index.ttl`](index.ttl) (W3C Turtle, OWL 2 + RDFS).
-This page is the human-readable projection of it. **The `.ttl` is authoritative** — if
-this page and the Turtle disagree, the Turtle wins and this page is the bug.
+The authoritative domain model. It says what exists and how concepts relate, and
+deliberately says nothing about Laravel, tables or classes — that mapping lives in
+[`architecture.md`](architecture.md).
 
-The ontology is a *planning* artifact. It says what exists in the domain and how
-concepts relate. It deliberately says nothing about Laravel, tables, or classes —
-that mapping lives in [`../architecture.md`](../architecture.md).
+Eleven concepts do not need a formal serialisation. A `.ttl` file nothing parses
+is a second copy of this page that can drift from it.
 
 ---
 
 ## 1. Core Concepts (OWL Classes)
 
-| Concept | URI | Role in the domain |
+| Concept | Persisted | Role in the domain |
 | :--- | :--- | :--- |
-| **Document** | `tds:Document` | The tracked record of one uploaded PDF/DOCX — identity, metadata, deadline, status. What the user sees in the CRUD list. Not the bytes. |
-| **StoredObject** | `tds:StoredObject` | The physical bytes on a storage disk backing exactly one Document. Has an independent lifetime: can be purged while the record survives as a tombstone. |
-| **UploadSession** | `tds:UploadSession` | One asynchronous upload attempt from the browser: progress, outcome, and a reason when refused. A rejected session produces no Document. |
-| **UploadPolicy** | `tds:UploadPolicy` | Admission rules every session is validated against: max size, allowed MIME types, allowed extensions. |
-| **RetentionPolicy** | `tds:RetentionPolicy` | The rule bounding how long a Document may live. Turns `uploadedAt` into `expiresAt` (default 24h). Single source of truth for that arithmetic. |
-| **RetentionSweep** | `tds:RetentionSweep` | One execution of the scheduled job that enforces the policy. Idempotent; records candidates found and rows removed. |
-| **DeletionEvent** | `tds:DeletionEvent` | The fact that a Document was removed, when, and why. **The junction where both deletion paths converge.** |
-| **DeletionTrigger** | `tds:DeletionTrigger` | Closed enumeration of causes: `ManualDeletion`, `RetentionExpiry`. |
-| **NotificationMessage** | `tds:NotificationMessage` | The AMQP payload published after a deletion. Publishing is in scope; sending the email is not. |
-| **MessageQueue** | `tds:MessageQueue` | The durable RabbitMQ destination (exchange + queue + routing key) carrying notifications onward. |
-| **NotificationRecipient** | `tds:NotificationRecipient` | The operator mailbox told about deletions. Address comes from the environment, not from a Document. |
+| **Document** | table | The tracked record of one uploaded PDF/DOCX — identity, metadata, deadline, status. What the user sees in the CRUD list. Not the bytes. |
+| **StoredObject** | columns | The physical bytes on a storage disk backing exactly one Document. Has an independent lifetime: can be purged while the record survives as a tombstone. |
+| **UploadSession** | no | One asynchronous upload attempt from the browser: progress, outcome, and a reason when refused. Lives for one request. A rejected session produces no Document. |
+| **UploadPolicy** | config | Admission rules every session is validated against: max size, allowed MIME types, allowed extensions. |
+| **RetentionPolicy** | config | The rule bounding how long a Document may live. Turns `uploadedAt` into `expiresAt` (default 24h). Single source of truth for that arithmetic. |
+| **RetentionSweep** | no | One execution of the scheduled job that enforces the policy. Idempotent. Its identity is a generated `sweepId` stamped on the events it raises; its counts go to the log, not a table. |
+| **DeletionEvent** | table | The fact that a Document was removed, when, and why. **The junction where both deletion paths converge.** |
+| **DeletionTrigger** | enum | Closed enumeration of causes: `manual_deletion`, `retention_expiry`. |
+| **NotificationMessage** | no | The AMQP payload published after a deletion. Publishing is in scope; sending the email is not. |
+| **MessageQueue** | config | The durable RabbitMQ destination (exchange + queue + routing key) carrying notifications onward. |
+| **NotificationRecipient** | config | The operator mailbox told about deletions. Address comes from the environment, not from a Document. |
 
 ---
 
@@ -42,8 +41,8 @@ DeletionEvent  --purges-->                StoredObject        (inverse: purgedBy
 DeletionEvent  --triggeredBy-->           DeletionTrigger
 DeletionEvent  --raisedDuringSweep-->     RetentionSweep      (automatic deletions only)
 DeletionEvent  --emitsNotification-->     NotificationMessage (inverse: emittedBy)
-Notification   --publishedTo-->           MessageQueue        (inverse: carries)
-Notification   --addressedTo-->           NotificationRecipient (inverse: receives)
+NotificationMessage --publishedTo-->      MessageQueue        (inverse: carries)
+NotificationMessage --addressedTo-->      NotificationRecipient (inverse: receives)
 ```
 
 ---

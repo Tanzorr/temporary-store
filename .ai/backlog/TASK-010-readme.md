@@ -44,7 +44,9 @@ The brief requires this file explicitly.
 - [ ] AC-8 — States the scope boundary: the app **publishes** to RabbitMQ;
       sending email over SMTP is deliberately out of scope, per the brief.
 - [ ] AC-9 — A short section on the spec-driven setup in `.ai/` — ontology,
-      context, router, backlog, archive — and how it was used.
+      context, router, backlog, archive — and how it was used. **Short**: the
+      reviewer is here for the application. One paragraph plus the `.ai/README.md`
+      link, not a tour.
 - [ ] AC-10 — `docker compose exec app php artisan test` documented, with the
       expected result.
 

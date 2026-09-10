@@ -21,12 +21,16 @@ off this one service.
 **Invariants:** **I-3** (one event per deletion), I-4 (side effects after commit),
 purge-failure rule
 **New concepts:** none — `DeletionEvent` and `DeletionTrigger` are already in
-[`index.ttl`](../context/ontology/index.ttl)
+[`ontology.md`](../context/ontology.md)
 
 ## Acceptance Criteria
 
 - [ ] AC-1 — Migration creates `deletion_events`: `id`, `uuid`, `document_id`,
       `trigger`, `initiator`, `occurred_at`, `sweep_id` (nullable), timestamps.
+      `sweep_id` is a **correlation id, not a foreign key** — there is no
+      `retention_sweeps` table and `RetentionSweep` is not persisted. It groups
+      the events one run raised so a log line and a set of rows can be tied
+      together; it is `null` for manual deletions.
 - [ ] AC-2 — `App\Domain\Deletion\DeletionTrigger` is a backed PHP enum with
       exactly `MANUAL_DELETION = 'manual_deletion'` and
       `RETENTION_EXPIRY = 'retention_expiry'`, matching the ontology's closed

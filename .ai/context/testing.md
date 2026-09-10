@@ -1,7 +1,7 @@
 # Testing
 
 Tests exist to prove the invariants in
-[`ontology/README.md`](ontology/README.md), not to raise a coverage number. A
+[`ontology.md`](ontology.md), not to raise a coverage number. A
 test that cannot fail proves nothing.
 
 ## Layers
@@ -74,5 +74,4 @@ docker compose exec app ./vendor/bin/pint --test
 ## Before Claiming Something Works
 
 Run the suite and read the output. "Should pass" is not a result. If a test
-fails, report the failure with its output rather than describing the intent —
-[`../router/self-reflect.md`](../router/self-reflect.md) covers what to do next.
+fails, report the failure with its output rather than describing the intent.

@@ -11,8 +11,8 @@ is part of the Definition of Done in
 ## Unreleased
 
 **Added**
-- Spec-driven development layer in `.ai/`: business value, domain ontology
-  (OWL/RDFS), code context, router modes, ticketed backlog and archive.
+- Spec-driven development layer in `.ai/`: business value, domain ontology,
+  code context, router modes, ticketed backlog and archive.
 - `CLAUDE.md` entry point routing into the ontology, the working modes and the
   tool rules.
 - `.claude/settings.json` permission policy: read-broad, ask on mutating
@@ -20,10 +20,23 @@ is part of the Definition of Done in
 - `.editorconfig` covering PHP, Blade, JS, YAML, Compose files and Dockerfiles.
 
 **Changed**
-- *(nothing yet)*
+- Ontology is one Markdown file (`.ai/context/ontology.md`) instead of a Turtle
+  source plus a prose projection of it. Nothing parsed the Turtle, so the second
+  copy could only drift.
+- Router reduced to the two modes that change something or judge what changed:
+  `implement` and `review`.
+
+**Removed**
+- `TASK-011` (project-local `msearch`/`mread`/`mreplace` tooling) — it shipped
+  nothing the reviewer runs and duplicated tools the agent already has.
+- ADR-008's representation resolver, in favour of `ADR-007`: JSON endpoints are
+  the only async surface, and jQuery updates the DOM.
 
 **Fixed**
-- *(nothing yet)*
+- `RetentionSweep` no longer implies a table that does not exist; `sweep_id` is
+  documented as a correlation id, and `VALUE.md` states plainly that the
+  "scheduler not running" risk is only partly mitigated.
+- MySQL is published on host port `33061`, avoiding a clash with a local server.
 
 ---
 

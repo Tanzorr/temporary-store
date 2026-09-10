@@ -25,7 +25,7 @@ scope the reviewer did not ask for.
 | :--- | :--- | :--- | :--- |
 | `app` | 9000 | — | PHP-FPM |
 | `web` | 80 | 8080 | Nginx, serves `public/` |
-| `mysql` | 3306 | 3306 | Volume `mysql-data` |
+| `mysql` | 3306 | **33061** | Volume `mysql-data`. Deliberately not 3306: a reviewer with a local MySQL would get a port clash, which is the likeliest "it did not come up on my machine" failure |
 | `rabbitmq` | 5672 / 15672 | 5672 / 15672 | Management UI at :15672 |
 | `queue` | — | — | `php artisan queue:work`, same image as `app` |
 | `scheduler` | — | — | `php artisan schedule:work`, drives the retention sweep |

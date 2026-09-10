@@ -34,7 +34,7 @@ either the design is incomplete or the concept is not real.
 | `UploadSession` | `App\Http\Requests\UploadDocumentRequest` + `App\Services\UploadDocument`. Not persisted — it exists for the duration of one request |
 | `UploadPolicy` | `config/uploads.php` → `App\Domain\Upload\UploadPolicy` |
 | `RetentionPolicy` | `config/retention.php` → `App\Domain\Retention\RetentionPolicy` |
-| `RetentionSweep` | `App\Console\Commands\SweepExpiredDocuments` + `App\Services\SweepExpiredDocuments` |
+| `RetentionSweep` | `App\Console\Commands\SweepExpiredDocuments` + `App\Services\SweepExpiredDocuments`. Not persisted: a run's identity is a generated `sweep_id` stamped on each `DeletionEvent` it raises; its counts go to the log |
 | `DeletionEvent` | `App\Models\DeletionEvent` + `deletion_events` table |
 | `DeletionTrigger` | PHP enum `App\Domain\Deletion\DeletionTrigger` (`MANUAL_DELETION`, `RETENTION_EXPIRY`) |
 | `NotificationMessage` | `App\Domain\Notification\DocumentDeletedMessage` (DTO → JSON) |
@@ -121,26 +121,18 @@ The client `Content-Type` header is attacker-controlled. Detection uses PHP's
 fileinfo on the temporary upload, checked against the `UploadPolicy` whitelist
 (**I-8**). Extension alone is never sufficient.
 
-### ADR-008 — Controller actions return data; a resolver picks the representation
+### ADR-007 — The JSON API is the only async surface; no representation resolver
 **2026-09-10 · Accepted**
-Every page in this application must serve two shapes of the same content: a full
-HTML document on first load, and a fragment when jQuery refreshes part of the
-page after an upload or a delete. The obvious implementation branches inside each
-action (`if ($request->ajax()) { ... } else { ... }`), which duplicates the branch
-in every action and lets the two shapes drift apart.
+Considered and rejected: actions returning plain arrays with a `RespondsWithView`
+trait picking full view / fragment / JSON, in the spirit of the `#[RepresentAs]`
+attribute in the reviewer's `quizler` project.
 
-Instead an action returns a plain array of data, and a `RespondsWithView` trait
-resolves it: full Blade view for a normal request, fragment view for a request
-carrying `X-Requested-With: XMLHttpRequest`, JSON when the client asks for it.
-The action states which templates it supports; it never inspects the request.
+It solves duplicated `if ($request->ajax())` branching — a problem this
+application does not have. There are two pages and two async interactions
+(upload, delete), and both are better served by endpoints that return JSON while
+jQuery updates the DOM. That is one shape per route, no fragment templates, no
+resolver.
 
-Adapted from the `#[RepresentAs]` attribute in the reviewer's `quizler` project,
-which does the same job with repeatable PHP attributes over Symfony + Turbo. We
-keep the idea and drop the attribute layer: Laravel has no attribute routing, and
-a trait plus a per-action template map is enough for three representations.
-
-Cost: one indirection between action and response. Buys a single definition of
-what a page contains, and no request-sniffing scattered across controllers.
-
-*(ADR-007 is reserved for the tooling-language decision in `TASK-011`, which is
-scheduled first.)*
+Cost: if a third page later needs server-rendered fragments, the branch appears
+and this ADR gets superseded. Accepted — a layer of indirection is cheap to add
+once it is earned and expensive to carry before then.

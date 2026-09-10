@@ -7,7 +7,7 @@ Judge a change against what this project promised, before it is committed.
 1. The diff — `git diff`, or `git diff --staged`
 2. The ticket it claims to implement
 3. [`../context/conventions.md`](../context/conventions.md) — the DON'T list and the Definition of Done
-4. [`../context/ontology/README.md`](../context/ontology/README.md) — invariants
+4. [`../context/ontology.md`](../context/ontology.md) — invariants
 5. [`../business/VALUE.md`](../business/VALUE.md) — only if scope looks wrong
 
 ## Checklist

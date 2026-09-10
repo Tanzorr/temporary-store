@@ -24,18 +24,21 @@ tools     ──►  ACTING         what may be read, run, changed
 │                             success criteria, non-goals
 ├── context/
 │   ├── INDEX.md              Which module to load, and when
-│   ├── ontology/index.ttl    The domain in OWL/RDFS — authoritative
-│   ├── ontology/README.md    Projection + invariants I-1…I-10
+│   ├── ontology.md           The domain — concepts, relations, I-1…I-10
 │   ├── stack.md              Versions, services, env keys, commands
-│   ├── architecture.md       Layering, concept→code map, ADR-001…008
+│   ├── architecture.md       Layering, concept→code map, ADR-001…006
 │   ├── conventions.md        Naming, design principles, DOs/DON'Ts, DoD
 │   ├── testing.md            Test layers, required coverage T-1…T-15
 │   └── tools.md              Permission model, search/edit/verify practice
-├── router/                   plan · explore · implement · review · debug ·
-│                             self-reflect — one file per working mode
-├── backlog/                  INDEX · TEMPLATE · TASK-001…TASK-011
+├── router/                   implement · review — the two modes that change
+│                             something, or judge what changed
+├── backlog/                  INDEX · TEMPLATE · TASK-001…TASK-010
 └── archive/                  Completed tickets, with outcome notes
 ```
+
+Deliberately absent: a mode file per activity, and a formal `.ttl` serialisation
+of eleven concepts. Both were written and both were cut — they cost maintenance
+and bought nothing a reader of this repository can use.
 
 [`../CLAUDE.md`](../CLAUDE.md) is the entry point that routes into all of this.
 A worked example of the layers cooperating is in the root
@@ -58,12 +61,14 @@ Each link is checkable, and a break in it is a defect worth naming:
 - A ticket with no value driver is scope creep.
 - An invariant with no test is a promise nobody is keeping.
 - A concept in the code absent from the ontology is a name nobody agreed on.
+- A concept in the ontology with no home in the code is a name nobody needed.
 - An archived ticket with no outcome note is a decision that was lost.
 
 ## Maintenance
 
 - Context describes the **current** system. Edit in place; git holds the history.
 - A decision between real alternatives becomes an ADR: what, why, what it cost.
-- A new or renamed concept updates `ontology/index.ttl` **in the same change**.
+- A new or renamed concept updates [`context/ontology.md`](context/ontology.md)
+  **in the same change**.
 - Drift between a module and the code is a defect. A stale context file is worse
   than a missing one, because it is trusted.

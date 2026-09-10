@@ -20,29 +20,26 @@ New tickets follow [`TEMPLATE.md`](TEMPLATE.md) and are created in
 | [TASK-008](TASK-008-retention-sweep.md) | Retention sweep command + scheduler | `planned` | P1 | V-1, V-2 | 006, 007 |
 | [TASK-009](TASK-009-test-suite.md) | Test suite covering T-1…T-15 | `planned` | P1 | V-3 | 008 |
 | [TASK-010](TASK-010-readme.md) | `README.md` setup and verification guide | `planned` | P1 | V-2 | 008 |
-| [TASK-011](TASK-011-agent-tooling.md) | `msearch` / `mread` / `mreplace` agent tooling | `planned` | P1 | V-2 | — |
 
 ## Dependency Order
 
 ```
-011 (no deps — do first, everything after benefits)
-
 001 ─► 002 ─┬─► 003 ─► 004
             │
             └─► 006 ─┬─► 005
-                     ├─► 007 ─► 008 ─┬─► 009
-                     │               └─► 010
-                     └───────────────────┘
+                     └─► 007 ─► 008 ─┬─► 009
+                                     └─► 010
 ```
-
-`011` is numbered last but has no dependencies and is scheduled first: it is the
-tooling layer the later multi-file tickets use. IDs are never renumbered, so
-**numbering does not imply order** — this table's `Depends on` column does.
 
 `006` is the hinge: `005`, `007` and `008` all depend on the single deletion path
 existing first. That ordering is deliberate — building the manual delete UI before
 `DeleteDocument` exists is how a project ends up with two deletion code paths and
 a missing notification (invariant **I-3**).
+
+IDs are never renumbered, so **numbering does not imply order** — this table's
+`Depends on` column does. `TASK-011` (project-local batch search/edit tooling)
+was written and then cut: it shipped nothing the reviewer runs, and duplicated
+tools the agent already has.
 
 ## Conventions
 

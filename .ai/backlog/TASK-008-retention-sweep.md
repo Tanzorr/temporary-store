@@ -62,6 +62,8 @@ requirement the brief singles out.
 
 The risk table in [`../business/VALUE.md`](../business/VALUE.md) names "scheduler
 not running" as the worst failure mode, because nothing errors — files simply
-live forever and V-1 is silently lost. That is why AC-4 records `ran_at`:
-monitoring should watch the sweep's *freshness*, not just its exit code. A job
-that never runs has no failing exit code to notice.
+live forever and V-1 is silently lost. AC-4's `ran_at` log line is what makes it
+checkable by hand. It is **not** monitoring: a job that never runs produces no
+log line and no failing exit code, so nothing fires. Real freshness alerting
+needs a persisted last-run timestamp and is out of scope — say so rather than
+implying the risk is closed.

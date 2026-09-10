@@ -34,9 +34,8 @@ invariants — it earns it by being checkable, not by being thorough-sounding.
 ## 1. ONTOLOGY
 
 The domain model is authoritative and lives in
-[`.ai/context/ontology/index.ttl`](.ai/context/ontology/index.ttl) (W3C Turtle,
-OWL 2 + RDFS). A human-readable projection with the invariants is in
-[`.ai/context/ontology/README.md`](.ai/context/ontology/README.md).
+[`.ai/context/ontology.md`](.ai/context/ontology.md) — concepts, relations,
+invariants I-1…I-10, open questions. One file, no second copy.
 
 **Concepts:** `Document` · `StoredObject` · `UploadSession` · `UploadPolicy` ·
 `RetentionPolicy` · `RetentionSweep` · `DeletionEvent` · `DeletionTrigger` ·
@@ -45,7 +44,7 @@ OWL 2 + RDFS). A human-readable projection with the invariants is in
 Rules that apply everywhere:
 
 - **Names come from the ontology.** The class is `Document`, not `File` or `Upload`.
-- **A new concept means updating `index.ttl`** in the same change.
+- **A new concept means updating `ontology.md`** in the same change.
 - **The invariants I-1…I-10 are not preferences.** Breaking one is a bug.
 
 The one to remember without looking it up:
@@ -61,27 +60,17 @@ The one to remember without looking it up:
 
 Pick the mode that matches the work, load that file, follow it.
 
-| Mode | File | Use when |
-| :--- | :--- | :--- |
-| **plan** | [`.ai/router/plan.md`](.ai/router/plan.md) | Turning an intent into a ticket |
-| **explore** | [`.ai/router/explore.md`](.ai/router/explore.md) | Answering a question. **Changes nothing** |
-| **implement** | [`.ai/router/implement.md`](.ai/router/implement.md) | Building what a ticket describes |
-| **review** | [`.ai/router/review.md`](.ai/router/review.md) | Judging a diff before commit |
-| **debug** | [`.ai/router/debug.md`](.ai/router/debug.md) | Finding the cause of an observed failure |
-| **self-reflect** | [`.ai/router/self-reflect.md`](.ai/router/self-reflect.md) | Before reporting done, or after something went wrong |
+| Mode | File | Use when | Load |
+| :--- | :--- | :--- | :--- |
+| **implement** | [`.ai/router/implement.md`](.ai/router/implement.md) | Building what a ticket describes | The ticket, [`conventions.md`](.ai/context/conventions.md), [`architecture.md`](.ai/context/architecture.md), [`stack.md`](.ai/context/stack.md), [`testing.md`](.ai/context/testing.md) |
+| **review** | [`.ai/router/review.md`](.ai/router/review.md) | Judging a diff before commit | The diff, the ticket, [`conventions.md`](.ai/context/conventions.md), the invariants |
 
-If no mode is stated: a question is **explore**, a request to build is
-**implement**, a vague intent is **plan**.
+Anything else — answering a question, chasing a bug, shaping a new ticket — needs
+no mode file. Read [`context/INDEX.md`](.ai/context/INDEX.md) and then only what
+the question actually needs. A question changes nothing on disk.
 
-### Context to load per mode
-
-- **plan** → [`VALUE.md`](.ai/business/VALUE.md), ontology README, [`architecture.md`](.ai/context/architecture.md), [`backlog/INDEX.md`](.ai/backlog/INDEX.md)
-- **implement** → the ticket, [`conventions.md`](.ai/context/conventions.md), [`architecture.md`](.ai/context/architecture.md), [`stack.md`](.ai/context/stack.md), [`testing.md`](.ai/context/testing.md)
-- **explore / debug** → [`context/INDEX.md`](.ai/context/INDEX.md), then only what the question needs
-- **review** → the diff, the ticket, [`conventions.md`](.ai/context/conventions.md), the invariants
-
-Do not load everything every time. Loading implementation detail during planning
-produces tickets that prescribe code instead of outcomes.
+Do not load everything every time. Loading implementation detail while shaping a
+ticket produces tickets that prescribe code instead of outcomes.
 
 ---
 
@@ -95,8 +84,8 @@ Work is done against a ticket. If there is no ticket for what you are about to
 do, either write one (plan mode) or say that the request falls outside the
 backlog — do not silently expand scope.
 
-A ticket is done only when all seven items of the Definition of Done in
-[`conventions.md`](.ai/context/conventions.md) hold. Then it moves to the archive.
+A ticket is done only when every item of the Definition of Done in
+[`conventions.md`](.ai/context/conventions.md) holds. Then it moves to the archive.
 
 ---
 

@@ -34,21 +34,18 @@ deletion travelling the same path as an automatic one.
       `DeleteDocument::handle($doc, DeletionTrigger::MANUAL_DELETION)` and
       nothing else. The controller contains no deletion logic (**I-3**).
 - [ ] AC-6 — Deletion happens asynchronously via jQuery, with a confirmation
-      dialog, and the row disappears without a page reload.
+      dialog, and the row disappears without a page reload. `DELETE` returns JSON;
+      the DOM update happens client-side (ADR-007) — no fragment template.
 - [ ] AC-7 — "Time remaining" is rendered from `expires_at`; the template never
       decides expiry itself (`conventions.md` → DON'T: no business logic in Blade).
 - [ ] AC-8 — A document whose deadline has passed but which the sweep has not yet
-      collected is shown as `expiring` rather than as a normal entry — the list
-      must not imply a promise the sweep is about to break.
+      collected is labelled *awaiting sweep* in the view — the list must not imply
+      a promise the sweep is about to break. This is **derived in the presenter
+      from `expires_at <= now()`**, not a third value of `status`, which stays
+      `available` | `deleted` (`TASK-002`). Adding a status value here would break
+      the sweep's `WHERE status = 'available'` query.
 - [ ] AC-9 — Feature test T-5, plus a test asserting the manual delete route
       produces a `DeletionEvent` with trigger `manual_deletion` (part of T-6).
-- [ ] AC-10 — Controller actions return an array of data, not a `Response`. A
-      `RespondsWithView` trait resolves it into the full Blade view, the fragment
-      view, or JSON — per **ADR-008**. No action inspects the request to decide
-      its own shape, and no action contains an `if ($request->ajax())` branch.
-- [ ] AC-11 — The list is defined once and rendered by both the full page and the
-      fragment. A feature test requests the same route with and without
-      `X-Requested-With: XMLHttpRequest` and asserts both carry the same rows.
 
 ## Out of Scope
 

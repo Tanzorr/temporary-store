@@ -27,7 +27,10 @@ reload.
 - [ ] AC-2 — Submitting uploads asynchronously via `XMLHttpRequest` with an
       `upload.onprogress` handler; the page does not reload.
 - [ ] AC-3 — A progress bar shows real transferred percentage, not a fake animation.
-- [ ] AC-4 — On success the new document appears in the page's list without a reload.
+- [ ] AC-4 — On success the response JSON is rendered as a confirmation row on the
+      upload page (name, size, expires at) with a link to `/documents`. `/` is the
+      uploader; the document list lives on `/documents` (`TASK-005`) and is not
+      duplicated here — the brief asks for a *separate* management page.
 - [ ] AC-5 — On `422` the server's `code` is mapped to a human message
       (`too_large` → "File exceeds the 10 MB limit", `unsupported_type` → "Only
       PDF and DOCX files are accepted").

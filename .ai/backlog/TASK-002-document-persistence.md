@@ -50,9 +50,15 @@ listing, sweeping and deletion all have something concrete to operate on.
 
 `status` is `available` | `deleted`. A deleted `Document` keeps its row as a
 tombstone; whether tombstones are eventually pruned is open question **Q-1** in
-[`../context/ontology/README.md`](../context/ontology/README.md) and is not
+[`../context/ontology.md`](../context/ontology.md) and is not
 decided by this ticket.
 
 All timestamps are UTC (`conventions.md` → DO). Store `uploaded_at` explicitly
 rather than reusing `created_at`: the retention promise is a domain fact, and
 should not silently change if a row is ever backfilled or re-created.
+
+`checksum_sha256` has no reader in this backlog — deduplication is open question
+**Q-2** and out of scope. It is kept because it is one line at write time and is
+what lets an operator verify a downloaded file matches what was stored. If that
+justification does not convince at review, drop the column rather than keeping a
+field nobody uses.

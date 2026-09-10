@@ -33,7 +33,7 @@ case it does not literally cover.
 not `File`, `Upload`, or `Attachment`. When code and ontology disagree on a name,
 one of them is wrong — fix it, do not translate at the boundary. Introducing a
 concept the ontology does not contain means updating
-[`ontology/index.ttl`](ontology/index.ttl) in the same change.
+[`ontology.md`](ontology.md) in the same change.
 
 ## Structure
 
@@ -144,7 +144,7 @@ A change is not done until all of these hold:
 3. `php artisan test` passes in full.
 4. Every invariant the change touches is still true — say which, in the ticket.
 5. If a decision was made, it is an ADR in [`architecture.md`](architecture.md).
-6. If a concept was added or renamed, `ontology/index.ttl` is updated.
+6. If a concept was added or renamed, `ontology.md` is updated.
 7. If the change is observable to a user or operator, it has a
    [`CHANGELOG.md`](../../CHANGELOG.md) entry prefixed with the ticket id.
 8. The ticket has moved to [`../archive/`](../archive/INDEX.md) with an outcome note.
