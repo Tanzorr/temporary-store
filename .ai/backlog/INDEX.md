@@ -10,8 +10,7 @@ New tickets follow [`TEMPLATE.md`](TEMPLATE.md) and are created in
 
 | ID | Title | Status | Priority | Value | Depends on |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| [TASK-009](TASK-009-test-suite.md) | Test suite covering T-1…T-15 | `planned` | P1 | V-3 | 008 |
-| [TASK-010](TASK-010-readme.md) | `README.md` setup and verification guide | `planned` | P1 | V-2 | 008 |
+| — | *(nothing open)* | | | | |
 
 ## Dependency Order
 

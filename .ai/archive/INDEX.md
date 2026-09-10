@@ -16,6 +16,8 @@ once its Definition of Done is satisfied in full
 | [TASK-005](TASK-005-crud-page.md) | Document list, download, manual delete UI | 2026-09-10 | V-5 | `DocumentRow` (ADR-013) keeps expiry logic out of Blade; all 5 manual-verification rows driven against a real headless browser |
 | [TASK-007](TASK-007-rabbitmq-publisher.md) | Notification publisher + queued job | 2026-09-10 | V-3, V-6 | One publish path for both `DeletionTrigger`s (ADR-014); broker-outage retry verified live — backoff fires at 10s/30s/60s, no duplicate `DeletionEvent` |
 | [TASK-008](TASK-008-retention-sweep.md) | Retention sweep command + scheduler | 2026-09-10 | V-1, V-2 | `SweepExpiredDocuments` adds no deletion logic of its own (I-3); idempotent by query exclusion + `DeleteDocument` de-dup (I-6); scheduler container's own `schedule:work` verified sweeping a real document live, not just run by hand |
+| [TASK-009](TASK-009-test-suite.md) | Test suite covering T-1…T-15 | 2026-09-10 | V-3 | All 15 rows already covered by prior tickets; verified with a real mutation test — commenting out the publish call fails T-6/T-7 (3 of 5 tests), confirming they're load-bearing, not decorative |
+| [TASK-010](TASK-010-readme.md) | `README.md` setup and verification guide | 2026-09-10 | V-2 | Env vars and payload shape derived from config/code, not `.env.example` (denied to the agent by its own permission rules); `artisan test` run for real (51 passed) — the `curl`/`rabbitmqadmin` verification walkthrough was **not** executed verbatim, flagged as an open follow-up in the ticket's Outcome |
 
 ## How to Archive a Ticket
 
