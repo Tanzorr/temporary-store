@@ -11,6 +11,15 @@ is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-006: `App\Services\DeleteDocument`, the only place a `Document` may be
+  deleted (I-3). One transaction creates the `DeletionEvent`, purges the
+  `StoredObject`, then marks the document deleted — rolling back all three if
+  the purge fails (T-12), and returning the existing event unchanged on a
+  repeat call instead of a second one (I-6). Dispatches
+  `App\Events\DocumentDeleted` from `DB::afterCommit`, never from inside the
+  transaction (I-4), for `TASK-007`'s publisher to consume. The trigger
+  (`App\Domain\Deletion\DeletionTrigger`: `manual_deletion` |
+  `retention_expiry`) is a required argument with no default.
 - TASK-004: `GET /` — Bootstrap + jQuery uploader with a real progress bar.
   Uploads go through `XMLHttpRequest` with `upload.onprogress`, no page
   reload; every failure mode (`too_large`, `unsupported_type`, `corrupt`,
