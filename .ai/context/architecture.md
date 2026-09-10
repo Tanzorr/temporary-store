@@ -188,6 +188,22 @@ name the wrapper rather than the work, and the retry policy (`$tries`,
 one extra hop. Accepted — the hop is where I-10's retry policy lives, and it
 keeps the listener a two-line translation.
 
+### ADR-015 — `expires_at` ends availability, not the sweep that acts on it
+**2026-09-10 · Accepted**
+Between `expires_at` and the `RetentionSweep` run that deletes it (up to 5
+minutes, `routes/console.php`), a Document is still `available`. `Document`
+therefore has a second scope, `downloadable()` = `available()` *and* still
+inside its window, and `DocumentController::download()` uses it — past the
+deadline the file is a `404` even though its row and bytes still exist. The
+alternative, serving it until the sweep catches up, was rejected: the retention
+window is the product's promise (V-1), and "24 hours, plus however late the
+scheduler is" is not a window anyone can state. Cost: two scopes that a reader
+must not confuse, and a row that is listed but not downloadable. Accepted —
+`destroy()` deliberately keeps the wider `available()`, because deleting early
+is exactly what an operator should still be able to do (V-5), and the list keeps
+showing the row so its *awaiting sweep* state is visible rather than silently
+vanishing before anything was actually deleted.
+
 ### ADR-011 — DOCX admitted by its OOXML MIME type alone, no `application/zip` fallback
 **2026-09-10 · Accepted**
 `stack.md` flagged a risk: some `file`/magic databases detect a `.docx` as

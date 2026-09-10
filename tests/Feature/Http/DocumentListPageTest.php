@@ -90,4 +90,16 @@ final class DocumentListPageTest extends TestCase
         $response->assertSee('overdue.pdf');
         $response->assertSee('awaiting sweep');
     }
+
+    #[Test]
+    public function it_offers_no_download_link_for_a_document_past_its_deadline(): void
+    {
+        $expired = Document::factory()->expired()->create();
+        $live = Document::factory()->create();
+
+        $response = $this->get('/documents');
+
+        $response->assertDontSee(route('documents.download', $expired->uuid));
+        $response->assertSee(route('documents.download', $live->uuid));
+    }
 }

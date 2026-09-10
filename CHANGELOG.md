@@ -10,6 +10,25 @@ is part of the Definition of Done in
 
 ## Unreleased
 
+**Fixed**
+- TASK-011: a failed `documents` insert no longer leaves the uploaded bytes on
+  disk. They had no row, so the `RetentionSweep` — which selects Documents —
+  could never reclaim them, and they outlived the retention window
+  indefinitely (V-1). `UploadDocument` now removes the stored object and
+  rethrows the original failure.
+- TASK-011: a Document past `expires_at` returns `404` from
+  `GET /documents/{uuid}/download` instead of being served until the sweep
+  reaches it, up to 5 minutes later (ADR-015, new `downloadable()` scope). Its
+  row is still listed as *awaiting sweep*, now without a usable download
+  control, and manual deletion of it still works and still produces exactly one
+  `DeletionEvent` (I-3, V-5).
+
+**Removed**
+- TASK-011: unused Laravel scaffolding — `App\Models\User`, `UserFactory`,
+  `config/auth.php`, the two `ExampleTest` files and the seeder's user seed.
+  This store has no auth (a non-goal in `VALUE.md`); the code was dead weight
+  a reviewer had to read and dismiss.
+
 **Added**
 - TASK-008: `php artisan documents:sweep-expired` — `App\Services\SweepExpiredDocuments`
   selects `available` Documents past `expires_at` in chunks of 200 and hands

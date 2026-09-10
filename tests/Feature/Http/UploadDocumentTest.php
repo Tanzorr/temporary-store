@@ -6,10 +6,12 @@ namespace Tests\Feature\Http;
 
 use App\Domain\Retention\RetentionPolicy;
 use App\Models\Document;
+use App\Services\UploadDocument;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Tests\TestCase;
 
 final class UploadDocumentTest extends TestCase
@@ -117,6 +119,28 @@ final class UploadDocumentTest extends TestCase
         $this->assertStringNotContainsString('..', $document->relative_path);
         Storage::disk('local')->assertExists($document->relative_path);
         $this->assertCount(1, Storage::disk('local')->allFiles());
+    }
+
+    #[Test]
+    public function it_leaves_no_bytes_behind_when_the_document_row_cannot_be_written(): void
+    {
+        // Bytes with no row are invisible to the RetentionSweep — it selects
+        // Documents — so they would outlive the retention window forever.
+        Document::creating(function (): void {
+            throw new RuntimeException('the database went away mid-upload');
+        });
+
+        try {
+            app(UploadDocument::class)->handle(
+                $this->fixture('sample.pdf', 'report.pdf', 'application/pdf')
+            );
+            $this->fail('Expected the insert failure to reach the caller.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('the database went away mid-upload', $exception->getMessage());
+        }
+
+        $this->assertSame(0, Document::query()->count());
+        $this->assertEmpty(Storage::disk('local')->allFiles());
     }
 
     private function fixture(string $fixtureName, string $originalName, string $mimeType): UploadedFile

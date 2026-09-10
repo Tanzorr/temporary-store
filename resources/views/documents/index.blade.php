@@ -33,10 +33,18 @@
                         <td>{{ $row->expiresAtLabel }}</td>
                         <td>{{ $row->timeRemainingLabel }}</td>
                         <td class="text-end">
-                            <a
-                                href="{{ route('documents.download', $row->uuid) }}"
-                                class="btn btn-sm btn-outline-primary"
-                            >Download</a>
+                            @if ($row->awaitingSweep)
+                                <span
+                                    class="btn btn-sm btn-outline-primary disabled"
+                                    aria-disabled="true"
+                                    title="Past its retention deadline — awaiting sweep"
+                                >Download</span>
+                            @else
+                                <a
+                                    href="{{ route('documents.download', $row->uuid) }}"
+                                    class="btn btn-sm btn-outline-primary"
+                                >Download</a>
+                            @endif
                             <button
                                 type="button"
                                 class="btn btn-sm btn-outline-danger delete-button"

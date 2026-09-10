@@ -57,7 +57,7 @@ final class DocumentController extends Controller
 
     public function download(string $uuid): StreamedResponse
     {
-        $document = Document::query()->available()->where('uuid', $uuid)->firstOrFail();
+        $document = Document::query()->downloadable()->where('uuid', $uuid)->firstOrFail();
 
         return Storage::disk($document->disk)->download(
             $document->relative_path,

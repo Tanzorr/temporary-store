@@ -49,6 +49,21 @@ final class DownloadDocumentTest extends TestCase
     }
 
     #[Test]
+    public function it_returns_404_for_an_expired_document_the_sweep_has_not_reached_yet(): void
+    {
+        Storage::fake('local');
+
+        $document = Document::factory()->expired()->create();
+        Storage::disk('local')->put($document->relative_path, 'file contents');
+
+        $response = $this->get("/documents/{$document->uuid}/download");
+
+        // Still `available` — the sweep has not run. Past its retention
+        // deadline is enough to stop serving it (ADR-015).
+        $response->assertNotFound();
+    }
+
+    #[Test]
     public function it_returns_404_for_a_deleted_document(): void
     {
         $document = Document::factory()->deleted()->create();

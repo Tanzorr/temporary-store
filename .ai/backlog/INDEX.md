@@ -10,7 +10,7 @@ New tickets follow [`TEMPLATE.md`](TEMPLATE.md) and are created in
 
 | ID | Title | Status | Priority | Value | Depends on |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| — | *(nothing open)* | | | | |
+| [TASK-012](TASK-012-original-name-length.md) | Reject an over-long `originalName` as a policy failure, not a 500 | `planned` | P2 | V-4 | TASK-011 |
 
 ## Dependency Order
 

@@ -14,6 +14,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Throwable;
 
 /**
  * Admits one already-validated UploadedFile (UploadDocumentRequest has
@@ -49,19 +50,29 @@ final class UploadDocument
             throw new RuntimeException("Failed to store uploaded file on disk [{$disk}].");
         }
 
-        return Document::create([
-            'uuid' => $uuid,
-            'original_name' => $file->getClientOriginalName(),
-            'stored_name' => $storedName,
-            'mime_type' => $mimeType,
-            'extension' => $extension,
-            'size_bytes' => $file->getSize(),
-            'checksum_sha256' => $checksum,
-            'disk' => $disk,
-            'relative_path' => $relativePath,
-            'status' => DocumentStatus::Available,
-            'uploaded_at' => $uploadedAt,
-            'expires_at' => $this->retentionPolicy->deadlineFor($uploadedAt),
-        ]);
+        try {
+            return Document::create([
+                'uuid' => $uuid,
+                'original_name' => $file->getClientOriginalName(),
+                'stored_name' => $storedName,
+                'mime_type' => $mimeType,
+                'extension' => $extension,
+                'size_bytes' => $file->getSize(),
+                'checksum_sha256' => $checksum,
+                'disk' => $disk,
+                'relative_path' => $relativePath,
+                'status' => DocumentStatus::Available,
+                'uploaded_at' => $uploadedAt,
+                'expires_at' => $this->retentionPolicy->deadlineFor($uploadedAt),
+            ]);
+        } catch (Throwable $exception) {
+            // Bytes with no row are invisible to the RetentionSweep, which
+            // selects Documents — they would outlive the retention window
+            // forever (V-1). The disk write is the only thing to undo here;
+            // the failure itself still reaches the caller.
+            Storage::disk($disk)->delete($relativePath);
+
+            throw $exception;
+        }
     }
 }
