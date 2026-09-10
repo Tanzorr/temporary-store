@@ -10,14 +10,7 @@ New tickets follow [`TEMPLATE.md`](TEMPLATE.md) and are created in
 
 | ID | Title | Status | Priority | Value | Depends on |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| [TASK-003](TASK-003-upload-endpoint.md) | Async upload endpoint with server-side policy | `planned` | P1 | V-4, V-1 | 002 |
-| [TASK-004](TASK-004-upload-ui.md) | Bootstrap + jQuery uploader with progress | `planned` | P1 | V-4 | 003 |
-| [TASK-005](TASK-005-crud-page.md) | Document list, download, manual delete UI | `planned` | P1 | V-5 | 006 |
-| [TASK-006](TASK-006-deletion-core.md) | `DeletionEvent`, `DeleteDocument`, trigger enum | `planned` | P1 | V-3, V-5 | 002 |
-| [TASK-007](TASK-007-rabbitmq-publisher.md) | Notification publisher + queued job | `planned` | P1 | V-3, V-6 | 006 |
-| [TASK-008](TASK-008-retention-sweep.md) | Retention sweep command + scheduler | `planned` | P1 | V-1, V-2 | 006, 007 |
-| [TASK-009](TASK-009-test-suite.md) | Test suite covering T-1…T-15 | `planned` | P1 | V-3 | 008 |
-| [TASK-010](TASK-010-readme.md) | `README.md` setup and verification guide | `planned` | P1 | V-2 | 008 |
+| — | *(nothing open)* | | | | |
 
 ## Dependency Order
 

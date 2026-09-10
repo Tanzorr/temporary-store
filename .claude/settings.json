@@ -98,7 +98,7 @@
       "Read(~/.aws/**)",
 
       "Edit(./.env)",
-      "Edit(./vendor/**)",
+      "Edit(/vendor/**)",
       "Edit(./node_modules/**)",
       "Edit(./storage/framework/**)",
 

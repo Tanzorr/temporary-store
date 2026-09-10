@@ -156,3 +156,49 @@ not "localhost" to the broker, so the `guest`/`guest` credentials in
 any host that can reach the broker, not just its own loopback. Acceptable — this
 is a dev-only broker on the Compose network (`stack.md`), not exposed to the
 host beyond the mapped ports.
+
+### ADR-012 — Bootstrap and jQuery are vendored under `public/vendor`, not loaded from a CDN
+**2026-09-10 · Accepted**
+The reviewer gets a working page with no network and nothing to configure — the
+same reasoning as ADR-005. Cost: two minified blobs in git that cannot be read
+in a diff. Accepted, because the alternative is a demo that silently renders
+unstyled and cannot upload at all when the CDN is unreachable or blocked.
+Pinned versions: Bootstrap 5.3.3, jQuery 3.7.1.
+
+### ADR-013 — Presenters live in `App\Http\Presenters`
+**2026-09-10 · Accepted**
+`DocumentRow` derives two display values (`timeRemainingLabel`,
+`awaitingSweep`) from `expires_at`, and both must never drift from the
+sweep's `WHERE expires_at <= NOW()`. Two alternatives were rejected: a Blade
+helper (banned — no business logic in templates, `conventions.md` → DON'T),
+and an `App\Domain` value object (rejected — it would have to import
+`App\Models\Document`, an upward dependency against this file's layering
+rule). Cost: a third directory under `app/Http`. Accepted — it makes the two
+drift-prone rules unit-testable in isolation from the view.
+
+### ADR-014 — A plain listener dispatching a queued job, not a queued listener
+**2026-09-10 · Accepted**
+`App\Listeners\DispatchDeletionNotification` is a plain class, auto-discovered
+from its typed `handle(DocumentDeleted $event)`, that dispatches
+`App\Jobs\PublishDeletionNotification`. Laravel would let the listener itself
+implement `ShouldQueue`, which is one class instead of two. Rejected: the queue
+would then hold a `CallQueuedListener` wrapper, so `queue:failed` and the logs
+name the wrapper rather than the work, and the retry policy (`$tries`,
+`backoff()`) would sit on a class whose job is wiring. Cost: one extra class and
+one extra hop. Accepted — the hop is where I-10's retry policy lives, and it
+keeps the listener a two-line translation.
+
+### ADR-011 — DOCX admitted by its OOXML MIME type alone, no `application/zip` fallback
+**2026-09-10 · Accepted**
+`stack.md` flagged a risk: some `file`/magic databases detect a `.docx` as
+`application/zip` rather than the specific OOXML type, because DOCX is a zip
+container. Verified against the actual `app` image (`php:8.2-fpm`, `fileinfo`
+built in) rather than assumed: `finfo` there correctly reports a real,
+LibreOffice-produced DOCX as
+`application/vnd.openxmlformats-officedocument.wordprocessingml.document`. So
+`UploadPolicy` whitelists that exact MIME type and nothing broader — no
+`application/zip` + extension fallback. Cost: a `file`/magic database that lacks
+OOXML detection would wrongly reject real DOCX files. Accepted for this image;
+if the deployment target's `fileinfo` ever regresses on this, that is a new
+ticket, not silently widening the whitelist to `application/zip` (which would
+admit *any* zip renamed `.docx`, defeating I-8).

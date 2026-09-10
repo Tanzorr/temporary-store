@@ -45,6 +45,7 @@ app/
   Http/
     Controllers/          Thin → validate, call a service, return a response
     Requests/             All validation rules live here, not in controllers
+    Presenters/           Read-model projections for one view (ADR-013)
   Infrastructure/         Adapters: Rabbit, filesystem
   Jobs/                   Queued work
   Models/                 Eloquent only
