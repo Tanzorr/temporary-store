@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Domain\Document\DocumentStatus;
 use App\Domain\Storage\StoredObject;
+use Carbon\CarbonImmutable;
 use Database\Factories\DocumentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,6 +43,16 @@ final class Document extends Model
     public function scopeAvailable(Builder $query): void
     {
         $query->where('status', DocumentStatus::Available);
+    }
+
+    /**
+     * Available *and* still inside its retention window (ADR-015). Narrower
+     * than `available()`: between `expires_at` and the sweep that acts on it,
+     * a Document is listed but must no longer be served.
+     */
+    public function scopeDownloadable(Builder $query): void
+    {
+        $query->available()->where('expires_at', '>', CarbonImmutable::now());
     }
 
     /**

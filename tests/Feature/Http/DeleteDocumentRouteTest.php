@@ -41,6 +41,24 @@ final class DeleteDocumentRouteTest extends TestCase
     }
 
     #[Test]
+    public function it_still_deletes_an_expired_document_the_sweep_has_not_reached_yet(): void
+    {
+        Storage::fake('local');
+
+        // Narrowing the download path to `downloadable` must not narrow this
+        // one: deleting early is the operator's job (V-5), and the result is
+        // one DeletionEvent either way (I-3).
+        $document = Document::factory()->expired()->create();
+        Storage::disk('local')->put($document->relative_path, 'contents');
+
+        $response = $this->delete("/documents/{$document->uuid}");
+
+        $response->assertOk();
+        $this->assertSame(1, DeletionEvent::query()->count());
+        $this->assertSame(DeletionTrigger::MANUAL_DELETION, DeletionEvent::query()->sole()->trigger);
+    }
+
+    #[Test]
     public function it_returns_404_for_an_unknown_uuid(): void
     {
         $response = $this->delete('/documents/'.Str::uuid());
