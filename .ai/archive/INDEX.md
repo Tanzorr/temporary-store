@@ -11,6 +11,7 @@ once its Definition of Done is satisfied in full
 | [TASK-001](TASK-001-project-skeleton.md) | Laravel + Docker Compose skeleton | 2026-09-10 | V-4 | Six healthy services; verified against a from-scratch, vendor-free clone |
 | [TASK-002](TASK-002-document-persistence.md) | `documents` table, model, factory | 2026-09-10 | V-3 | `RetentionPolicy` is the sole source of `expiresAt`; verified against real MySQL |
 | [TASK-003](TASK-003-upload-endpoint.md) | Async upload endpoint with server-side policy | 2026-09-10 | V-4, V-1 | Content-detected MIME whitelist, uuid-based storage names; verified end-to-end through nginx + php-fpm, not just feature tests |
+| [TASK-004](TASK-004-upload-ui.md) | Bootstrap + jQuery uploader with progress | 2026-09-10 | V-4 | One upload function shared by input and drop zone; every manual-verification row driven against a real headless browser, not eyeballed |
 
 ## How to Archive a Ticket
 

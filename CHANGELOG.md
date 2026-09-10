@@ -11,6 +11,13 @@ is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-004: `GET /` — Bootstrap + jQuery uploader with a real progress bar.
+  Uploads go through `XMLHttpRequest` with `upload.onprogress`, no page
+  reload; every failure mode (`too_large`, `unsupported_type`, `corrupt`,
+  `413`/non-JSON body, network error) maps to a specific message.
+  `original_name` reaches the DOM only through `.text()`/`{{ }}` (I-7).
+  Bootstrap and jQuery are vendored under `public/vendor`, not loaded from a
+  CDN (ADR-012).
 - TASK-003: `POST /documents` — async upload endpoint. Validation
   (size, content-detected MIME type) lives in `UploadDocumentRequest` and
   rejects server-side regardless of the client's `Content-Type` or filename

@@ -157,6 +157,14 @@ any host that can reach the broker, not just its own loopback. Acceptable — th
 is a dev-only broker on the Compose network (`stack.md`), not exposed to the
 host beyond the mapped ports.
 
+### ADR-012 — Bootstrap and jQuery are vendored under `public/vendor`, not loaded from a CDN
+**2026-09-10 · Accepted**
+The reviewer gets a working page with no network and nothing to configure — the
+same reasoning as ADR-005. Cost: two minified blobs in git that cannot be read
+in a diff. Accepted, because the alternative is a demo that silently renders
+unstyled and cannot upload at all when the CDN is unreachable or blocked.
+Pinned versions: Bootstrap 5.3.3, jQuery 3.7.1.
+
 ### ADR-011 — DOCX admitted by its OOXML MIME type alone, no `application/zip` fallback
 **2026-09-10 · Accepted**
 `stack.md` flagged a risk: some `file`/magic databases detect a `.docx` as

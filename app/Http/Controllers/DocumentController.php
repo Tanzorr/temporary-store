@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Domain\Upload\UploadPolicy;
 use App\Http\Requests\UploadDocumentRequest;
 use App\Services\UploadDocument;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 
 final class DocumentController extends Controller
 {
+    public function create(): View
+    {
+        return view('documents.create', ['policy' => UploadPolicy::fromConfig()]);
+    }
+
     public function store(UploadDocumentRequest $request, UploadDocument $uploadDocument): JsonResponse
     {
         $document = $uploadDocument->handle($request->file('file'));
