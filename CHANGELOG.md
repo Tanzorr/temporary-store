@@ -11,6 +11,17 @@ is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-008: `php artisan documents:sweep-expired` — `App\Services\SweepExpiredDocuments`
+  selects `available` Documents past `expires_at` in chunks of 200 and hands
+  each to `DeleteDocument` with `DeletionTrigger::RETENTION_EXPIRY` and a
+  generated `sweep_id`, no deletion logic of its own (I-3). A run is
+  idempotent (I-6): a re-swept document is already excluded by the
+  `available` scope, and `DeleteDocument`'s own de-dup is the second line of
+  defence. One candidate failing to purge is logged and does not abort the
+  rest of the run — `deleted_count` then differs from `candidate_count`, the
+  signal to alert on. Registered in `routes/console.php` on the `scheduler`
+  container, every 5 minutes, `withoutOverlapping()`. Safe to run by hand at
+  any time, which is how the 24h retention path is verified without waiting.
 - TASK-007: `App\Listeners\DispatchDeletionNotification` turns every
   `DocumentDeleted` into a queued `App\Jobs\PublishDeletionNotification`
   (ADR-014), which publishes a `NotificationMessage` to RabbitMQ through

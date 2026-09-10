@@ -15,6 +15,7 @@ once its Definition of Done is satisfied in full
 | [TASK-006](TASK-006-deletion-core.md) | `DeletionEvent`, `DeleteDocument`, trigger enum | 2026-09-10 | V-3, V-5 | Single deletion path with a DB-unique `document_id` backing I-3; purge failure rolls back the whole transaction |
 | [TASK-005](TASK-005-crud-page.md) | Document list, download, manual delete UI | 2026-09-10 | V-5 | `DocumentRow` (ADR-013) keeps expiry logic out of Blade; all 5 manual-verification rows driven against a real headless browser |
 | [TASK-007](TASK-007-rabbitmq-publisher.md) | Notification publisher + queued job | 2026-09-10 | V-3, V-6 | One publish path for both `DeletionTrigger`s (ADR-014); broker-outage retry verified live — backoff fires at 10s/30s/60s, no duplicate `DeletionEvent` |
+| [TASK-008](TASK-008-retention-sweep.md) | Retention sweep command + scheduler | 2026-09-10 | V-1, V-2 | `SweepExpiredDocuments` adds no deletion logic of its own (I-3); idempotent by query exclusion + `DeleteDocument` de-dup (I-6); scheduler container's own `schedule:work` verified sweeping a real document live, not just run by hand |
 
 ## How to Archive a Ticket
 
