@@ -156,3 +156,18 @@ not "localhost" to the broker, so the `guest`/`guest` credentials in
 any host that can reach the broker, not just its own loopback. Acceptable — this
 is a dev-only broker on the Compose network (`stack.md`), not exposed to the
 host beyond the mapped ports.
+
+### ADR-011 — DOCX admitted by its OOXML MIME type alone, no `application/zip` fallback
+**2026-09-10 · Accepted**
+`stack.md` flagged a risk: some `file`/magic databases detect a `.docx` as
+`application/zip` rather than the specific OOXML type, because DOCX is a zip
+container. Verified against the actual `app` image (`php:8.2-fpm`, `fileinfo`
+built in) rather than assumed: `finfo` there correctly reports a real,
+LibreOffice-produced DOCX as
+`application/vnd.openxmlformats-officedocument.wordprocessingml.document`. So
+`UploadPolicy` whitelists that exact MIME type and nothing broader — no
+`application/zip` + extension fallback. Cost: a `file`/magic database that lacks
+OOXML detection would wrongly reject real DOCX files. Accepted for this image;
+if the deployment target's `fileinfo` ever regresses on this, that is a new
+ticket, not silently widening the whitelist to `application/zip` (which would
+admit *any* zip renamed `.docx`, defeating I-8).

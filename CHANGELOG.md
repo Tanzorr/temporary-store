@@ -11,6 +11,13 @@ is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-003: `POST /documents` — async upload endpoint. Validation
+  (size, content-detected MIME type) lives in `UploadDocumentRequest` and
+  rejects server-side regardless of the client's `Content-Type` or filename
+  (I-1, I-8); `UploadDocument` stores accepted files under a generated
+  `{uuid}.{extension}` name, so the original filename can never reach the
+  filesystem as a path (I-7), and reads the expiry from `RetentionPolicy`
+  (I-2). Covered by feature tests for T-1, T-2, T-3, T-4 and T-15.
 - TASK-002: `documents` table, `App\Models\Document`, `RetentionPolicy` and
   `DocumentFactory`. `RetentionPolicy` is the only place an expiry is
   computed (I-2), proven by a unit test covering the default TTL and a
