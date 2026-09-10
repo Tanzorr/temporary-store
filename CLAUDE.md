@@ -10,6 +10,27 @@ module.
 
 ---
 
+## 0. BE BRIEF
+
+Whoever reviews this repository may have twenty minutes, not an afternoon. Every
+document competes for that time, and length is not evidence of rigour.
+
+- **Lead with the answer.** Context after it, or not at all.
+- **One fact in one place.** If it is stated in another file, link — never restate.
+- **Cut any sentence that survives its own deletion.** If removing it loses
+  nothing, it was costing the reader for free.
+- **Tables and lists** wherever the content is a set of items.
+- **No preamble, no recap.** Don't announce what you are about to say, and don't
+  summarise what you just said.
+- **Say the trade-off, not the sales pitch.** "Costs an extra table" beats three
+  sentences of justification.
+
+Applies to documentation, tickets, commit messages, code comments, and replies to
+the user alike. When something genuinely needs length — acceptance criteria,
+invariants — it earns it by being checkable, not by being thorough-sounding.
+
+---
+
 ## 1. ONTOLOGY
 
 The domain model is authoritative and lives in

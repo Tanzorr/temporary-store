@@ -10,7 +10,7 @@ every time.
 | [`ontology/README.md`](ontology/README.md) | Same, human-readable first pass | Concept table, relation graph, invariants I-1…I-10, open questions |
 | [`stack.md`](stack.md) | Before running or wiring anything | Versions, services, ports, env vars, how to run things |
 | [`architecture.md`](architecture.md) | Before adding a class or choosing where code goes | Layering, where each ontology concept lives in code, ADRs |
-| [`conventions.md`](conventions.md) | Every time you write code | Naming, structure, DOs/DON'Ts, review checklist |
+| [`conventions.md`](conventions.md) | Every time you write code | Naming, structure, design principles (SOLID, refactoring vocabulary), DOs/DON'Ts, Definition of Done |
 | [`testing.md`](testing.md) | Before writing a test or claiming something works | Test layers, what must be covered, how to prove an invariant |
 | [`tools.md`](tools.md) | When searching, editing or inspecting the repo | Which tool for which job, permission model, forbidden operations |
 

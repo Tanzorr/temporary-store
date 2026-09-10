@@ -31,6 +31,15 @@ Judge a change against what this project promised, before it is committed.
   leaves the test green, the test is decorative.
 - Do T-6 and T-7 still pass — the manual and automatic notification paths?
 
+**Design principles**
+- Does any class have two reasons to change (SRP)? Does the domain reference
+  infrastructure anywhere (DIP)?
+- Name the smell if there is one — Feature Envy, Primitive Obsession, Shotgun
+  Surgery — rather than describing it. If no catalogue name fits, say so plainly;
+  do not stretch one to sound rigorous.
+- Extractions: does each extracted function have a real name, or does it exist
+  only to shorten its caller?
+
 **Conventions**
 - `strict_types`, typed signatures, `final`, constructor promotion.
 - `env()` only inside `config/*.php`.
@@ -39,6 +48,8 @@ Judge a change against what this project promised, before it is committed.
 
 **Documentation**
 - New concept in the ontology? New decision as an ADR? Drifted context module fixed?
+- Is any fact now stated in two files? Is there a paragraph that would lose
+  nothing by being deleted? Both are findings — see CLAUDE.md §0.
 
 ## Report
 

@@ -52,6 +52,35 @@ app/
 config/                   retention.php, uploads.php, notifications.php, rabbitmq.php
 ```
 
+## Design Principles
+
+Vocabulary from **Robert C. Martin** (SOLID) and **Martin Fowler** (refactoring,
+smells, PoEAA) — worth having because "Shotgun Surgery" lands faster in a review
+than a paragraph describing it. SOLID itself is already expressed as concrete
+rules in [`architecture.md`](architecture.md) and [`testing.md`](testing.md);
+only what those files do **not** say is written here.
+
+- **Fakes must fail like the real thing.** A fake `NotificationPublisher` that
+  only ever succeeds makes the whole suite lie (LSP).
+- **Name the smell** in reviews — Feature Envy, Primitive Obsession, Shotgun
+  Surgery — or say plainly that none fits, rather than stretching one to sound
+  rigorous. *Shotgun Surgery* is what appears if deletion logic reaches a second
+  call site; **I-3** is the guard against it.
+- **This is a Service Layer over a Domain Model** (PoEAA), not DDD. Nobody
+  "upgrades" it to aggregates and an event bus — that is scope, not improvement.
+
+Where the two authors conflict, the rulings here:
+
+1. **Function length.** Extract when the extracted part *has a name*. Never to
+   hit a line count — a function that only shortens its caller costs a jump and
+   buys nothing.
+2. **Comments.** Delete comments restating *what*. Keep *why*; if the why is a
+   decision between alternatives, promote it to an ADR.
+3. **Framework purity.** `App\Domain` is framework-free, `App\Models` is frankly
+   Eloquent. Fully hexagonal Laravel is ceremony for a 24-hour file store.
+
+When a principle and a passing, readable test disagree, the test wins.
+
 ## DO
 
 - **Put domain rules in services.** A controller that computes an expiry date is
@@ -116,4 +145,6 @@ A change is not done until all of these hold:
 4. Every invariant the change touches is still true — say which, in the ticket.
 5. If a decision was made, it is an ADR in [`architecture.md`](architecture.md).
 6. If a concept was added or renamed, `ontology/index.ttl` is updated.
-7. The ticket has moved to [`../archive/`](../archive/INDEX.md) with an outcome note.
+7. If the change is observable to a user or operator, it has a
+   [`CHANGELOG.md`](../../CHANGELOG.md) entry prefixed with the ticket id.
+8. The ticket has moved to [`../archive/`](../archive/INDEX.md) with an outcome note.
