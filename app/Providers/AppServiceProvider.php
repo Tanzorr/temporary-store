@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domain\Notification\NotificationPublisher;
+use App\Infrastructure\Rabbit\RabbitPublisher;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(NotificationPublisher::class, RabbitPublisher::class);
     }
 
     /**

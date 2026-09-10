@@ -176,6 +176,18 @@ and an `App\Domain` value object (rejected — it would have to import
 rule). Cost: a third directory under `app/Http`. Accepted — it makes the two
 drift-prone rules unit-testable in isolation from the view.
 
+### ADR-014 — A plain listener dispatching a queued job, not a queued listener
+**2026-09-10 · Accepted**
+`App\Listeners\DispatchDeletionNotification` is a plain class, auto-discovered
+from its typed `handle(DocumentDeleted $event)`, that dispatches
+`App\Jobs\PublishDeletionNotification`. Laravel would let the listener itself
+implement `ShouldQueue`, which is one class instead of two. Rejected: the queue
+would then hold a `CallQueuedListener` wrapper, so `queue:failed` and the logs
+name the wrapper rather than the work, and the retry policy (`$tries`,
+`backoff()`) would sit on a class whose job is wiring. Cost: one extra class and
+one extra hop. Accepted — the hop is where I-10's retry policy lives, and it
+keeps the listener a two-line translation.
+
 ### ADR-011 — DOCX admitted by its OOXML MIME type alone, no `application/zip` fallback
 **2026-09-10 · Accepted**
 `stack.md` flagged a risk: some `file`/magic databases detect a `.docx` as

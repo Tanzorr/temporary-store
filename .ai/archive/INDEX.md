@@ -14,6 +14,7 @@ once its Definition of Done is satisfied in full
 | [TASK-004](TASK-004-upload-ui.md) | Bootstrap + jQuery uploader with progress | 2026-09-10 | V-4 | One upload function shared by input and drop zone; every manual-verification row driven against a real headless browser, not eyeballed |
 | [TASK-006](TASK-006-deletion-core.md) | `DeletionEvent`, `DeleteDocument`, trigger enum | 2026-09-10 | V-3, V-5 | Single deletion path with a DB-unique `document_id` backing I-3; purge failure rolls back the whole transaction |
 | [TASK-005](TASK-005-crud-page.md) | Document list, download, manual delete UI | 2026-09-10 | V-5 | `DocumentRow` (ADR-013) keeps expiry logic out of Blade; all 5 manual-verification rows driven against a real headless browser |
+| [TASK-007](TASK-007-rabbitmq-publisher.md) | Notification publisher + queued job | 2026-09-10 | V-3, V-6 | One publish path for both `DeletionTrigger`s (ADR-014); broker-outage retry verified live — backoff fires at 10s/30s/60s, no duplicate `DeletionEvent` |
 
 ## How to Archive a Ticket
 

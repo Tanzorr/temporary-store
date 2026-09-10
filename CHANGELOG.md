@@ -11,6 +11,15 @@ is part of the Definition of Done in
 ## Unreleased
 
 **Added**
+- TASK-007: `App\Listeners\DispatchDeletionNotification` turns every
+  `DocumentDeleted` into a queued `App\Jobs\PublishDeletionNotification`
+  (ADR-014), which publishes a `NotificationMessage` to RabbitMQ through
+  `App\Infrastructure\Rabbit\RabbitPublisher` (ADR-004). The message id is
+  the `DeletionEvent` uuid (I-5); the exchange and queue are declared durable
+  and the message persistent (AC-6); the job retries with backoff on a
+  broker outage without creating a second `DeletionEvent` (I-10). Same path
+  for both `DeletionTrigger` values — the publisher carries no branch on
+  which one it is (AC-10). New dependency: `php-amqplib/php-amqplib`.
 - TASK-005: `GET /documents` — the operator's document list, with download and
   manual delete. Available documents only (T-5), paginated 25 per page,
   newest-first with an `id` tie-break for a stable order within one second.
